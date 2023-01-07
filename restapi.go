@@ -2945,6 +2945,13 @@ func (s *Session) ApplicationCommandPermissionsBatchEdit(appID, guildID string, 
 // interaction : Interaction instance.
 // resp        : Response message data.
 func (s *Session) InteractionRespond(interaction *Interaction, resp *InteractionResponse) error {
+	s.httpInteractionsMu.Lock()
+	if respondFunc, ok := s.httpInteractions[interaction.ID]; ok {
+		s.httpInteractionsMu.Unlock()
+		return respondFunc(resp)
+	}
+	s.httpInteractionsMu.Unlock()
+
 	endpoint := EndpointInteractionResponse(interaction.ID, interaction.Token)
 
 	if resp.Data != nil && len(resp.Data.Files) > 0 {
