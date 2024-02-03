@@ -1,6 +1,7 @@
 package discordgo
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -43,7 +44,7 @@ const (
 // A User stores all data for an individual Discord user.
 type User struct {
 	// The ID of the user.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The email of the user. This is only present when
 	// the application possesses the email scope for the user.
@@ -116,7 +117,7 @@ func (u *User) String() string {
 
 // Mention return a string which mentions the user
 func (u *User) Mention() string {
-	return "<@" + u.ID + ">"
+	return fmt.Sprintf("<@%s>", u.ID)
 }
 
 // AvatarURL returns a URL to the user's avatar.
@@ -145,7 +146,7 @@ func (u *User) BannerURL(size string) string {
 // DefaultAvatarIndex returns the index of the user's default avatar.
 func (u *User) DefaultAvatarIndex() int {
 	if u.Discriminator == "0" {
-		id, _ := strconv.ParseUint(u.ID, 10, 64)
+		id, _ := strconv.ParseUint(string(u.ID), 10, 64)
 		return int((id >> 22) % 6)
 	}
 

@@ -34,9 +34,9 @@ type VoiceConnection struct {
 	Debug        bool // If true, print extra logging -- DEPRECATED
 	LogLevel     int
 	Ready        bool // If true, voice is ready to send/receive audio
-	UserID       string
-	GuildID      string
-	ChannelID    string
+	UserID       Snowflake
+	GuildID      Snowflake
+	ChannelID    Snowflake
 	deaf         bool
 	mute         bool
 	speaking     bool
@@ -115,7 +115,7 @@ func (v *VoiceConnection) Speaking(b bool) (err error) {
 
 // ChangeChannel sends Discord a request to change channels within a Guild
 // !!! NOTE !!! This function may be removed in favour of just using ChannelVoiceJoin
-func (v *VoiceConnection) ChangeChannel(channelID string, mute, deaf bool) (err error) {
+func (v *VoiceConnection) ChangeChannel(channelID Snowflake, mute, deaf bool) (err error) {
 
 	v.log(LogInformational, "called")
 
@@ -316,10 +316,10 @@ func (v *VoiceConnection) open() (err error) {
 	}
 
 	type voiceHandshakeData struct {
-		ServerID  string `json:"server_id"`
-		UserID    string `json:"user_id"`
-		SessionID string `json:"session_id"`
-		Token     string `json:"token"`
+		ServerID  Snowflake `json:"server_id"`
+		UserID    Snowflake `json:"user_id"`
+		SessionID string    `json:"session_id"`
+		Token     string    `json:"token"`
 	}
 	type voiceHandshakeOp struct {
 		Op   int                `json:"op"` // Always 0
@@ -501,8 +501,6 @@ func (v *VoiceConnection) onEvent(message []byte) {
 	default:
 		v.log(LogDebug, "unknown voice operation, %d, %s", e.Operation, string(e.RawData))
 	}
-
-	return
 }
 
 type voiceHeartbeatOp struct {
@@ -920,7 +918,7 @@ func (v *VoiceConnection) reconnect() {
 			wait = 600
 		}
 
-		if v.session.DataReady == false || v.session.wsConn == nil {
+		if !v.session.DataReady || v.session.wsConn == nil {
 			v.log(LogInformational, "cannot reconnect to channel %s with unready session", v.ChannelID)
 			continue
 		}

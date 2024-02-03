@@ -25,14 +25,14 @@ const (
 // A TeamMember struct stores values for a single Team Member, extending the normal User data - note that the user field is partial
 type TeamMember struct {
 	User            *User           `json:"user"`
-	TeamID          string          `json:"team_id"`
+	TeamID          Snowflake       `json:"team_id"`
 	MembershipState MembershipState `json:"membership_state"`
 	Permissions     []string        `json:"permissions"`
 }
 
 // A Team struct stores the members of a Discord Developer Team as well as some metadata about it
 type Team struct {
-	ID          string        `json:"id"`
+	ID          Snowflake     `json:"id"`
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Icon        string        `json:"icon"`
@@ -41,8 +41,9 @@ type Team struct {
 }
 
 // Application returns an Application structure of a specific Application
-//   appID : The ID of an Application
-func (s *Session) Application(appID string) (st *Application, err error) {
+//
+//	appID : The ID of an Application
+func (s *Session) Application(appID Snowflake) (st *Application, err error) {
 
 	body, err := s.RequestWithBucketID("GET", EndpointOAuth2Application(appID), nil, EndpointOAuth2Application(""))
 	if err != nil {
@@ -66,8 +67,9 @@ func (s *Session) Applications() (st []*Application, err error) {
 }
 
 // ApplicationCreate creates a new Application
-//    name : Name of Application / Bot
-//    uris : Redirect URIs (Not required)
+//
+//	name : Name of Application / Bot
+//	uris : Redirect URIs (Not required)
 func (s *Session) ApplicationCreate(ap *Application) (st *Application, err error) {
 
 	data := struct {
@@ -85,8 +87,9 @@ func (s *Session) ApplicationCreate(ap *Application) (st *Application, err error
 }
 
 // ApplicationUpdate updates an existing Application
-//   var : desc
-func (s *Session) ApplicationUpdate(appID string, ap *Application) (st *Application, err error) {
+//
+//	var : desc
+func (s *Session) ApplicationUpdate(appID Snowflake, ap *Application) (st *Application, err error) {
 
 	data := struct {
 		Name        string `json:"name"`
@@ -103,8 +106,9 @@ func (s *Session) ApplicationUpdate(appID string, ap *Application) (st *Applicat
 }
 
 // ApplicationDelete deletes an existing Application
-//   appID : The ID of an Application
-func (s *Session) ApplicationDelete(appID string) (err error) {
+//
+//	appID : The ID of an Application
+func (s *Session) ApplicationDelete(appID Snowflake) (err error) {
 
 	_, err = s.RequestWithBucketID("DELETE", EndpointOAuth2Application(appID), nil, EndpointOAuth2Application(""))
 	if err != nil {
@@ -122,7 +126,7 @@ type Asset struct {
 }
 
 // ApplicationAssets returns an application's assets
-func (s *Session) ApplicationAssets(appID string) (ass []*Asset, err error) {
+func (s *Session) ApplicationAssets(appID Snowflake) (ass []*Asset, err error) {
 
 	body, err := s.RequestWithBucketID("GET", EndpointOAuth2ApplicationAssets(appID), nil, EndpointOAuth2ApplicationAssets(""))
 	if err != nil {
@@ -139,10 +143,10 @@ func (s *Session) ApplicationAssets(appID string) (ass []*Asset, err error) {
 
 // ApplicationBotCreate creates an Application Bot Account
 //
-//   appID : The ID of an Application
+//	appID : The ID of an Application
 //
 // NOTE: func name may change, if I can think up something better.
-func (s *Session) ApplicationBotCreate(appID string) (st *User, err error) {
+func (s *Session) ApplicationBotCreate(appID Snowflake) (st *User, err error) {
 
 	body, err := s.RequestWithBucketID("POST", EndpointOAuth2ApplicationsBot(appID), nil, EndpointOAuth2ApplicationsBot(""))
 	if err != nil {

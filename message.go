@@ -11,6 +11,7 @@ package discordgo
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -48,13 +49,13 @@ const (
 // A Message stores all data related to a specific Discord message.
 type Message struct {
 	// The ID of the message.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The ID of the channel in which the message was sent.
-	ChannelID string `json:"channel_id"`
+	ChannelID Snowflake `json:"channel_id"`
 
 	// The ID of the guild in which the message was sent.
-	GuildID string `json:"guild_id,omitempty"`
+	GuildID Snowflake `json:"guild_id,omitempty"`
 
 	// The content of the message.
 	Content string `json:"content"`
@@ -70,7 +71,7 @@ type Message struct {
 	EditedTimestamp *time.Time `json:"edited_timestamp"`
 
 	// The roles mentioned in the message.
-	MentionRoles []string `json:"mention_roles"`
+	MentionRoles []Snowflake `json:"mention_roles"`
 
 	// Whether the message is text-to-speech.
 	TTS bool `json:"tts"`
@@ -181,7 +182,7 @@ func (m *Message) GetCustomEmojis() []*Emoji {
 	for _, em := range emojis {
 		parts := strings.Split(em, ":")
 		toReturn = append(toReturn, &Emoji{
-			ID:       parts[2][:len(parts[2])-1],
+			ID:       Snowflake(parts[2][:len(parts[2])-1]),
 			Name:     parts[1],
 			Animated: strings.HasPrefix(em, "<a:"),
 		})
@@ -260,8 +261,8 @@ type MessageEdit struct {
 	// Overwrite existing attachments
 	Attachments *[]*MessageAttachment `json:"attachments,omitempty"`
 
-	ID      string
-	Channel string
+	ID      Snowflake
+	Channel Snowflake
 
 	// TODO: Remove this when compatibility is not required.
 	Embed *MessageEmbed `json:"-"`
@@ -269,7 +270,7 @@ type MessageEdit struct {
 
 // NewMessageEdit returns a MessageEdit struct, initialized
 // with the Channel and ID.
-func NewMessageEdit(channelID string, messageID string) *MessageEdit {
+func NewMessageEdit(channelID, messageID Snowflake) *MessageEdit {
 	return &MessageEdit{
 		Channel: channelID,
 		ID:      messageID,
@@ -466,10 +467,10 @@ type MessageApplication struct {
 
 // MessageReference contains reference data sent with crossposted messages
 type MessageReference struct {
-	MessageID       string `json:"message_id"`
-	ChannelID       string `json:"channel_id,omitempty"`
-	GuildID         string `json:"guild_id,omitempty"`
-	FailIfNotExists *bool  `json:"fail_if_not_exists,omitempty"`
+	MessageID       Snowflake `json:"message_id"`
+	ChannelID       Snowflake `json:"channel_id,omitempty"`
+	GuildID         Snowflake `json:"guild_id,omitempty"`
+	FailIfNotExists *bool     `json:"fail_if_not_exists,omitempty"`
 }
 
 func (m *Message) reference(failIfNotExists bool) *MessageReference {
@@ -499,8 +500,8 @@ func (m *Message) ContentWithMentionsReplaced() (content string) {
 
 	for _, user := range m.Mentions {
 		content = strings.NewReplacer(
-			"<@"+user.ID+">", "@"+user.Username,
-			"<@!"+user.ID+">", "@"+user.Username,
+			fmt.Sprintf("<@%s>", user.ID), "@"+user.Username,
+			fmt.Sprintf("<@!%s>", user.ID), "@"+user.Username,
 		).Replace(content)
 	}
 	return
@@ -533,8 +534,8 @@ func (m *Message) ContentWithMoreMentionsReplaced(s *Session) (content string, e
 		}
 
 		content = strings.NewReplacer(
-			"<@"+user.ID+">", "@"+user.Username,
-			"<@!"+user.ID+">", "@"+nick,
+			fmt.Sprintf("<@%s>", user.ID), "@"+user.Username,
+			fmt.Sprintf("<@!%s>", user.ID), "@"+nick,
 		).Replace(content)
 	}
 	for _, roleID := range m.MentionRoles {
@@ -543,11 +544,11 @@ func (m *Message) ContentWithMoreMentionsReplaced(s *Session) (content string, e
 			continue
 		}
 
-		content = strings.Replace(content, "<@&"+role.ID+">", "@"+role.Name, -1)
+		content = strings.Replace(content, fmt.Sprintf("<@&%s>", role.ID), "@"+role.Name, -1)
 	}
 
 	content = patternChannels.ReplaceAllStringFunc(content, func(mention string) string {
-		channel, err := s.State.Channel(mention[2 : len(mention)-1])
+		channel, err := s.State.Channel(Snowflake(mention[2 : len(mention)-1]))
 		if err != nil || channel.Type == ChannelTypeGuildVoice {
 			return mention
 		}

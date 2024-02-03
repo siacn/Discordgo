@@ -48,9 +48,9 @@ type State struct {
 	TrackVoice         bool
 	TrackPresences     bool
 
-	guildMap   map[string]*Guild
-	channelMap map[string]*Channel
-	memberMap  map[string]map[string]*Member
+	guildMap   map[Snowflake]*Guild
+	channelMap map[Snowflake]*Channel
+	memberMap  map[Snowflake]map[Snowflake]*Member
 }
 
 // NewState creates an empty state.
@@ -68,14 +68,14 @@ func NewState() *State {
 		TrackRoles:         true,
 		TrackVoice:         true,
 		TrackPresences:     true,
-		guildMap:           make(map[string]*Guild),
-		channelMap:         make(map[string]*Channel),
-		memberMap:          make(map[string]map[string]*Member),
+		guildMap:           make(map[Snowflake]*Guild),
+		channelMap:         make(map[Snowflake]*Channel),
+		memberMap:          make(map[Snowflake]map[Snowflake]*Member),
 	}
 }
 
 func (s *State) createMemberMap(guild *Guild) {
-	members := make(map[string]*Member)
+	members := make(map[Snowflake]*Member)
 	for _, m := range guild.Members {
 		members[m.User.ID] = m
 	}
@@ -107,7 +107,7 @@ func (s *State) GuildAdd(guild *Guild) error {
 		s.createMemberMap(guild)
 	} else if _, ok := s.memberMap[guild.ID]; !ok {
 		// Even if we have no new member slice, we still initialize the member map for this guild if it doesn't exist
-		s.memberMap[guild.ID] = make(map[string]*Member)
+		s.memberMap[guild.ID] = make(map[Snowflake]*Member)
 	}
 
 	if g, ok := s.guildMap[guild.ID]; ok {
@@ -175,9 +175,10 @@ func (s *State) GuildRemove(guild *Guild) error {
 
 // Guild gets a guild by ID.
 // Useful for querying if @me is in a guild:
-//     _, err := discordgo.Session.State.Guild(guildID)
-//     isInGuild := err == nil
-func (s *State) Guild(guildID string) (*Guild, error) {
+//
+//	_, err := discordgo.Session.State.Guild(guildID)
+//	isInGuild := err == nil
+func (s *State) Guild(guildID Snowflake) (*Guild, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -192,7 +193,7 @@ func (s *State) Guild(guildID string) (*Guild, error) {
 	return nil, ErrStateNotFound
 }
 
-func (s *State) presenceAdd(guildID string, presence *Presence) error {
+func (s *State) presenceAdd(guildID Snowflake, presence *Presence) error {
 	guild, ok := s.guildMap[guildID]
 	if !ok {
 		return ErrStateNotFound
@@ -247,7 +248,7 @@ func (s *State) presenceAdd(guildID string, presence *Presence) error {
 
 // PresenceAdd adds a presence to the current world state, or
 // updates it if it already exists.
-func (s *State) PresenceAdd(guildID string, presence *Presence) error {
+func (s *State) PresenceAdd(guildID Snowflake, presence *Presence) error {
 	if s == nil {
 		return ErrNilState
 	}
@@ -259,7 +260,7 @@ func (s *State) PresenceAdd(guildID string, presence *Presence) error {
 }
 
 // PresenceRemove removes a presence from the current world state.
-func (s *State) PresenceRemove(guildID string, presence *Presence) error {
+func (s *State) PresenceRemove(guildID Snowflake, presence *Presence) error {
 	if s == nil {
 		return ErrNilState
 	}
@@ -283,7 +284,7 @@ func (s *State) PresenceRemove(guildID string, presence *Presence) error {
 }
 
 // Presence gets a presence by ID from a guild.
-func (s *State) Presence(guildID, userID string) (*Presence, error) {
+func (s *State) Presence(guildID, userID Snowflake) (*Presence, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -379,7 +380,7 @@ func (s *State) MemberRemove(member *Member) error {
 }
 
 // Member gets a member by ID from a guild.
-func (s *State) Member(guildID, userID string) (*Member, error) {
+func (s *State) Member(guildID, userID Snowflake) (*Member, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -402,7 +403,7 @@ func (s *State) Member(guildID, userID string) (*Member, error) {
 
 // RoleAdd adds a role to the current world state, or
 // updates it if it already exists.
-func (s *State) RoleAdd(guildID string, role *Role) error {
+func (s *State) RoleAdd(guildID Snowflake, role *Role) error {
 	if s == nil {
 		return ErrNilState
 	}
@@ -427,7 +428,7 @@ func (s *State) RoleAdd(guildID string, role *Role) error {
 }
 
 // RoleRemove removes a role from current world state by ID.
-func (s *State) RoleRemove(guildID, roleID string) error {
+func (s *State) RoleRemove(guildID, roleID Snowflake) error {
 	if s == nil {
 		return ErrNilState
 	}
@@ -451,7 +452,7 @@ func (s *State) RoleRemove(guildID, roleID string) error {
 }
 
 // Role gets a role by ID from a guild.
-func (s *State) Role(guildID, roleID string) (*Role, error) {
+func (s *State) Role(guildID, roleID Snowflake) (*Role, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -671,7 +672,7 @@ func (s *State) ThreadMemberUpdate(mu *ThreadMemberUpdate) error {
 }
 
 // Channel gets a channel by ID, it will look in all guilds and private channels.
-func (s *State) Channel(channelID string) (*Channel, error) {
+func (s *State) Channel(channelID Snowflake) (*Channel, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -687,7 +688,7 @@ func (s *State) Channel(channelID string) (*Channel, error) {
 }
 
 // Emoji returns an emoji for a guild and emoji id.
-func (s *State) Emoji(guildID, emojiID string) (*Emoji, error) {
+func (s *State) Emoji(guildID, emojiID Snowflake) (*Emoji, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -710,7 +711,7 @@ func (s *State) Emoji(guildID, emojiID string) (*Emoji, error) {
 }
 
 // EmojiAdd adds an emoji to the current world state.
-func (s *State) EmojiAdd(guildID string, emoji *Emoji) error {
+func (s *State) EmojiAdd(guildID Snowflake, emoji *Emoji) error {
 	if s == nil {
 		return ErrNilState
 	}
@@ -735,7 +736,7 @@ func (s *State) EmojiAdd(guildID string, emoji *Emoji) error {
 }
 
 // EmojisAdd adds multiple emojis to the world state.
-func (s *State) EmojisAdd(guildID string, emojis []*Emoji) error {
+func (s *State) EmojisAdd(guildID Snowflake, emojis []*Emoji) error {
 	for _, e := range emojis {
 		if err := s.EmojiAdd(guildID, e); err != nil {
 			return err
@@ -811,7 +812,7 @@ func (s *State) MessageRemove(message *Message) error {
 }
 
 // messageRemoveByID removes a message by channelID and messageID from the world state.
-func (s *State) messageRemoveByID(channelID, messageID string) error {
+func (s *State) messageRemoveByID(channelID, messageID Snowflake) error {
 	c, err := s.Channel(channelID)
 	if err != nil {
 		return err
@@ -863,7 +864,7 @@ func (s *State) voiceStateUpdate(update *VoiceStateUpdate) error {
 }
 
 // VoiceState gets a VoiceState by guild and user ID.
-func (s *State) VoiceState(guildID, userID string) (*VoiceState, error) {
+func (s *State) VoiceState(guildID, userID Snowflake) (*VoiceState, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -883,7 +884,7 @@ func (s *State) VoiceState(guildID, userID string) (*VoiceState, error) {
 }
 
 // Message gets a message by channel and message ID.
-func (s *State) Message(channelID, messageID string) (*Message, error) {
+func (s *State) Message(channelID, messageID Snowflake) (*Message, error) {
 	if s == nil {
 		return nil, ErrNilState
 	}
@@ -1068,7 +1069,8 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		}
 	case *ThreadUpdate:
 		if s.TrackThreads {
-			old, err := s.Channel(t.ID)
+			var old *Channel
+			old, err = s.Channel(t.ID)
 			if err == nil {
 				oldCopy := *old
 				t.BeforeUpdate = &oldCopy
@@ -1169,7 +1171,7 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 // UserChannelPermissions returns the permission of a user in a channel.
 // userID    : The ID of the user to calculate permissions for.
 // channelID : The ID of the channel to calculate permission for.
-func (s *State) UserChannelPermissions(userID, channelID string) (apermissions int64, err error) {
+func (s *State) UserChannelPermissions(userID, channelID Snowflake) (apermissions int64, err error) {
 	if s == nil {
 		return 0, ErrNilState
 	}
@@ -1221,7 +1223,7 @@ func (s *State) MessagePermissions(message *Message) (apermissions int64, err er
 // 0 is returned in cases of error, which is the color of @everyone.
 // userID    : The ID of the user to calculate the color for.
 // channelID   : The ID of the channel to calculate the color for.
-func (s *State) UserColor(userID, channelID string) int {
+func (s *State) UserColor(userID, channelID Snowflake) int {
 	if s == nil {
 		return 0
 	}
@@ -1268,7 +1270,7 @@ func (s *State) MessageColor(message *Message) int {
 	return firstRoleColorColor(guild, message.Member.Roles)
 }
 
-func firstRoleColorColor(guild *Guild, memberRoles []string) int {
+func firstRoleColorColor(guild *Guild, memberRoles []Snowflake) int {
 	roles := Roles(guild.Roles)
 	sort.Sort(roles)
 

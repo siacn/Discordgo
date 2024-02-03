@@ -202,12 +202,12 @@ func (t InteractionType) String() string {
 
 // Interaction represents data of an interaction.
 type Interaction struct {
-	ID        string          `json:"id"`
-	AppID     string          `json:"application_id"`
+	ID        Snowflake       `json:"id"`
+	AppID     Snowflake       `json:"application_id"`
 	Type      InteractionType `json:"type"`
 	Data      InteractionData `json:"data"`
-	GuildID   string          `json:"guild_id"`
-	ChannelID string          `json:"channel_id"`
+	GuildID   Snowflake       `json:"guild_id"`
+	ChannelID Snowflake       `json:"channel_id"`
 
 	// The message on which interaction was used.
 	// NOTE: this field is only filled when a button click triggered the interaction. Otherwise it will be nil.
@@ -454,7 +454,7 @@ func (o ApplicationCommandInteractionDataOption) ChannelValue(s *Session) *Chann
 	if o.Type != ApplicationCommandOptionChannel {
 		panic("ChannelValue called on data option of type " + o.Type.String())
 	}
-	chanID := o.Value.(string)
+	chanID := Snowflake(o.Value.(string))
 
 	if s == nil {
 		return &Channel{ID: chanID}
@@ -473,11 +473,11 @@ func (o ApplicationCommandInteractionDataOption) ChannelValue(s *Session) *Chann
 
 // RoleValue is a utility function for casting option value to role object.
 // s : Session object, if not nil, function additionally fetches all role's data
-func (o ApplicationCommandInteractionDataOption) RoleValue(s *Session, gID string) *Role {
+func (o ApplicationCommandInteractionDataOption) RoleValue(s *Session, gID Snowflake) *Role {
 	if o.Type != ApplicationCommandOptionRole && o.Type != ApplicationCommandOptionMentionable {
 		panic("RoleValue called on data option of type " + o.Type.String())
 	}
-	roleID := o.Value.(string)
+	roleID := Snowflake(o.Value.(string))
 
 	if s == nil || gID == "" {
 		return &Role{ID: roleID}
@@ -505,7 +505,7 @@ func (o ApplicationCommandInteractionDataOption) UserValue(s *Session) *User {
 	if o.Type != ApplicationCommandOptionUser && o.Type != ApplicationCommandOptionMentionable {
 		panic("UserValue called on data option of type " + o.Type.String())
 	}
-	userID := o.Value.(string)
+	userID := Snowflake(o.Value.(string))
 
 	if s == nil {
 		return &User{ID: userID}

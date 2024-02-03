@@ -11,7 +11,9 @@
 
 package discordgo
 
-import "strconv"
+import (
+	"strconv"
+)
 
 // APIVersion is the Discord API version used for the REST and Websocket API.
 var APIVersion = "9"
@@ -47,172 +49,196 @@ var (
 	EndpointVoice        = EndpointAPI + "/voice/"
 	EndpointVoiceRegions = EndpointVoice + "regions"
 
-	EndpointUser               = func(uID string) string { return EndpointUsers + uID }
-	EndpointUserAvatar         = func(uID, aID string) string { return EndpointCDNAvatars + uID + "/" + aID + ".png" }
-	EndpointUserAvatarAnimated = func(uID, aID string) string { return EndpointCDNAvatars + uID + "/" + aID + ".gif" }
-	EndpointDefaultUserAvatar  = func(idx int) string {
+	EndpointUser       = func(uID Snowflake) string { return EndpointUsers + string(uID) }
+	EndpointUserAvatar = func(uID Snowflake, hash string) string {
+		return EndpointCDNAvatars + string(uID) + "/" + hash + ".png"
+	}
+	EndpointUserAvatarAnimated = func(uID Snowflake, hash string) string {
+		return EndpointCDNAvatars + string(uID) + "/" + hash + ".gif"
+	}
+	EndpointDefaultUserAvatar = func(idx int) string {
 		return EndpointCDN + "embed/avatars/" + strconv.Itoa(idx) + ".png"
 	}
-	EndpointUserBanner = func(uID, cID string) string {
-		return EndpointCDNBanners + uID + "/" + cID + ".png"
+	EndpointUserBanner = func(uID Snowflake, hash string) string {
+		return EndpointCDNBanners + string(uID) + "/" + hash + ".png"
 	}
-	EndpointUserBannerAnimated = func(uID, cID string) string {
-		return EndpointCDNBanners + uID + "/" + cID + ".gif"
+	EndpointUserBannerAnimated = func(uID Snowflake, hash string) string {
+		return EndpointCDNBanners + string(uID) + "/" + hash + ".gif"
 	}
 
-	EndpointUserGuilds                    = func(uID string) string { return EndpointUsers + uID + "/guilds" }
-	EndpointUserGuild                     = func(uID, gID string) string { return EndpointUsers + uID + "/guilds/" + gID }
-	EndpointUserGuildMember               = func(uID, gID string) string { return EndpointUserGuild(uID, gID) + "/member" }
-	EndpointUserChannels                  = func(uID string) string { return EndpointUsers + uID + "/channels" }
-	EndpointUserApplicationRoleConnection = func(aID string) string { return EndpointUsers + "@me/applications/" + aID + "/role-connection" }
-	EndpointUserConnections               = func(uID string) string { return EndpointUsers + uID + "/connections" }
-
-	EndpointGuild                    = func(gID string) string { return EndpointGuilds + gID }
-	EndpointGuildAutoModeration      = func(gID string) string { return EndpointGuild(gID) + "/auto-moderation" }
-	EndpointGuildAutoModerationRules = func(gID string) string { return EndpointGuildAutoModeration(gID) + "/rules" }
-	EndpointGuildAutoModerationRule  = func(gID, rID string) string { return EndpointGuildAutoModerationRules(gID) + "/" + rID }
-	EndpointGuildThreads             = func(gID string) string { return EndpointGuild(gID) + "/threads" }
-	EndpointGuildActiveThreads       = func(gID string) string { return EndpointGuildThreads(gID) + "/active" }
-	EndpointGuildPreview             = func(gID string) string { return EndpointGuilds + gID + "/preview" }
-	EndpointGuildChannels            = func(gID string) string { return EndpointGuilds + gID + "/channels" }
-	EndpointGuildMembers             = func(gID string) string { return EndpointGuilds + gID + "/members" }
-	EndpointGuildMembersSearch       = func(gID string) string { return EndpointGuildMembers(gID) + "/search" }
-	EndpointGuildMember              = func(gID, uID string) string { return EndpointGuilds + gID + "/members/" + uID }
-	EndpointGuildMemberRole          = func(gID, uID, rID string) string { return EndpointGuilds + gID + "/members/" + uID + "/roles/" + rID }
-	EndpointGuildBans                = func(gID string) string { return EndpointGuilds + gID + "/bans" }
-	EndpointGuildBan                 = func(gID, uID string) string { return EndpointGuilds + gID + "/bans/" + uID }
-	EndpointGuildIntegrations        = func(gID string) string { return EndpointGuilds + gID + "/integrations" }
-	EndpointGuildIntegration         = func(gID, iID string) string { return EndpointGuilds + gID + "/integrations/" + iID }
-	EndpointGuildRoles               = func(gID string) string { return EndpointGuilds + gID + "/roles" }
-	EndpointGuildRole                = func(gID, rID string) string { return EndpointGuilds + gID + "/roles/" + rID }
-	EndpointGuildInvites             = func(gID string) string { return EndpointGuilds + gID + "/invites" }
-	EndpointGuildWidget              = func(gID string) string { return EndpointGuilds + gID + "/widget" }
-	EndpointGuildEmbed               = EndpointGuildWidget
-	EndpointGuildPrune               = func(gID string) string { return EndpointGuilds + gID + "/prune" }
-	EndpointGuildIcon                = func(gID, hash string) string { return EndpointCDNIcons + gID + "/" + hash + ".png" }
-	EndpointGuildIconAnimated        = func(gID, hash string) string { return EndpointCDNIcons + gID + "/" + hash + ".gif" }
-	EndpointGuildSplash              = func(gID, hash string) string { return EndpointCDNSplashes + gID + "/" + hash + ".png" }
-	EndpointGuildWebhooks            = func(gID string) string { return EndpointGuilds + gID + "/webhooks" }
-	EndpointGuildAuditLogs           = func(gID string) string { return EndpointGuilds + gID + "/audit-logs" }
-	EndpointGuildEmojis              = func(gID string) string { return EndpointGuilds + gID + "/emojis" }
-	EndpointGuildEmoji               = func(gID, eID string) string { return EndpointGuilds + gID + "/emojis/" + eID }
-	EndpointGuildBanner              = func(gID, hash string) string { return EndpointCDNBanners + gID + "/" + hash + ".png" }
-	EndpointGuildBannerAnimated      = func(gID, hash string) string { return EndpointCDNBanners + gID + "/" + hash + ".gif" }
-	EndpointGuildStickers            = func(gID string) string { return EndpointGuilds + gID + "/stickers" }
-	EndpointGuildSticker             = func(gID, sID string) string { return EndpointGuilds + gID + "/stickers/" + sID }
-	EndpointStageInstance            = func(cID string) string { return EndpointStageInstances + "/" + cID }
-	EndpointGuildScheduledEvents     = func(gID string) string { return EndpointGuilds + gID + "/scheduled-events" }
-	EndpointGuildScheduledEvent      = func(gID, eID string) string { return EndpointGuilds + gID + "/scheduled-events/" + eID }
-	EndpointGuildScheduledEventUsers = func(gID, eID string) string { return EndpointGuildScheduledEvent(gID, eID) + "/users" }
-	EndpointGuildOnboarding          = func(gID string) string { return EndpointGuilds + gID + "/onboarding" }
-	EndpointGuildTemplate            = func(tID string) string { return EndpointGuilds + "templates/" + tID }
-	EndpointGuildTemplates           = func(gID string) string { return EndpointGuilds + gID + "/templates" }
-	EndpointGuildTemplateSync        = func(gID, tID string) string { return EndpointGuilds + gID + "/templates/" + tID }
-	EndpointGuildMemberAvatar        = func(gId, uID, aID string) string {
-		return EndpointCDNGuilds + gId + "/users/" + uID + "/avatars/" + aID + ".png"
+	EndpointUserGuilds                    = func(uID Snowflake) string { return EndpointUsers + string(uID) + "/guilds" }
+	EndpointUserGuild                     = func(uID, gID Snowflake) string { return EndpointUsers + string(uID) + "/guilds/" + string(gID) }
+	EndpointUserGuildMember               = func(uID, gID Snowflake) string { return EndpointUserGuild(uID, gID) + "/member" }
+	EndpointUserChannels                  = func(uID Snowflake) string { return EndpointUsers + string(uID) + "/channels" }
+	EndpointUserApplicationRoleConnection = func(aID Snowflake) string {
+		return EndpointUsers + "@me/applications/" + string(aID) + "/role-connection"
 	}
-	EndpointGuildMemberAvatarAnimated = func(gId, uID, aID string) string {
-		return EndpointCDNGuilds + gId + "/users/" + uID + "/avatars/" + aID + ".gif"
+	EndpointUserConnections = func(uID Snowflake) string { return EndpointUsers + string(uID) + "/connections" }
+
+	EndpointGuild                    = func(gID Snowflake) string { return EndpointGuilds + string(gID) }
+	EndpointGuildAutoModeration      = func(gID Snowflake) string { return EndpointGuild(gID) + "/auto-moderation" }
+	EndpointGuildAutoModerationRules = func(gID Snowflake) string { return EndpointGuildAutoModeration(gID) + "/rules" }
+	EndpointGuildAutoModerationRule  = func(gID, rID Snowflake) string { return EndpointGuildAutoModerationRules(gID) + "/" + string(rID) }
+	EndpointGuildThreads             = func(gID Snowflake) string { return EndpointGuild(gID) + "/threads" }
+	EndpointGuildActiveThreads       = func(gID Snowflake) string { return EndpointGuildThreads(gID) + "/active" }
+	EndpointGuildPreview             = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/preview" }
+	EndpointGuildChannels            = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/channels" }
+	EndpointGuildMembers             = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/members" }
+	EndpointGuildMembersSearch       = func(gID Snowflake) string { return EndpointGuildMembers(gID) + "/search" }
+	EndpointGuildMember              = func(gID, uID Snowflake) string { return EndpointGuilds + string(gID) + "/members/" + string(uID) }
+	EndpointGuildMemberRole          = func(gID, uID, rID Snowflake) string {
+		return EndpointGuilds + string(gID) + "/members/" + string(uID) + "/roles/" + string(rID)
+	}
+	EndpointGuildBans         = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/bans" }
+	EndpointGuildBan          = func(gID, uID Snowflake) string { return EndpointGuilds + string(gID) + "/bans/" + string(uID) }
+	EndpointGuildIntegrations = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/integrations" }
+	EndpointGuildIntegration  = func(gID, iID Snowflake) string {
+		return EndpointGuilds + string(gID) + "/integrations/" + string(iID)
+	}
+	EndpointGuildRoles        = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/roles" }
+	EndpointGuildRole         = func(gID, rID Snowflake) string { return EndpointGuilds + string(gID) + "/roles/" + string(rID) }
+	EndpointGuildInvites      = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/invites" }
+	EndpointGuildWidget       = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/widget" }
+	EndpointGuildEmbed        = EndpointGuildWidget
+	EndpointGuildPrune        = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/prune" }
+	EndpointGuildIcon         = func(gID Snowflake, hash string) string { return EndpointCDNIcons + string(gID) + "/" + hash + ".png" }
+	EndpointGuildIconAnimated = func(gID Snowflake, hash string) string { return EndpointCDNIcons + string(gID) + "/" + hash + ".gif" }
+	EndpointGuildSplash       = func(gID Snowflake, hash string) string {
+		return EndpointCDNSplashes + string(gID) + "/" + hash + ".png"
+	}
+	EndpointGuildWebhooks  = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/webhooks" }
+	EndpointGuildAuditLogs = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/audit-logs" }
+	EndpointGuildEmojis    = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/emojis" }
+	EndpointGuildEmoji     = func(gID, eID Snowflake) string { return EndpointGuilds + string(gID) + "/emojis/" + string(eID) }
+	EndpointGuildBanner    = func(gID Snowflake, hash string) string {
+		return EndpointCDNBanners + string(gID) + "/" + hash + ".png"
+	}
+	EndpointGuildBannerAnimated = func(gID Snowflake, hash string) string {
+		return EndpointCDNBanners + string(gID) + "/" + hash + ".gif"
+	}
+	EndpointGuildStickers        = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/stickers" }
+	EndpointGuildSticker         = func(gID, sID Snowflake) string { return EndpointGuilds + string(gID) + "/stickers/" + string(sID) }
+	EndpointStageInstance        = func(cID Snowflake) string { return EndpointStageInstances + "/" + string(cID) }
+	EndpointGuildScheduledEvents = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/scheduled-events" }
+	EndpointGuildScheduledEvent  = func(gID, eID Snowflake) string {
+		return EndpointGuilds + string(gID) + "/scheduled-events/" + string(eID)
+	}
+	EndpointGuildScheduledEventUsers = func(gID, eID Snowflake) string { return EndpointGuildScheduledEvent(gID, eID) + "/users" }
+	EndpointGuildOnboarding          = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/onboarding" }
+	EndpointGuildTemplate            = func(code string) string { return EndpointGuilds + "templates/" + code }
+	EndpointGuildTemplates           = func(gID Snowflake) string { return EndpointGuilds + string(gID) + "/templates" }
+	EndpointGuildTemplateSync        = func(gID Snowflake, code string) string { return EndpointGuilds + string(gID) + "/templates/" + code }
+	EndpointGuildMemberAvatar        = func(gID, uID Snowflake, hash string) string {
+		return EndpointCDNGuilds + string(gID) + "/users/" + string(uID) + "/avatars/" + hash + ".png"
+	}
+	EndpointGuildMemberAvatarAnimated = func(gID, uID Snowflake, hash string) string {
+		return EndpointCDNGuilds + string(gID) + "/users/" + string(uID) + "/avatars/" + hash + ".gif"
 	}
 
 	EndpointRoleIcon = func(rID, hash string) string {
-		return EndpointCDNRoleIcons + rID + "/" + hash + ".png"
+		return EndpointCDNRoleIcons + string(rID) + "/" + hash + ".png"
 	}
 
-	EndpointChannel                             = func(cID string) string { return EndpointChannels + cID }
-	EndpointChannelThreads                      = func(cID string) string { return EndpointChannel(cID) + "/threads" }
-	EndpointChannelActiveThreads                = func(cID string) string { return EndpointChannelThreads(cID) + "/active" }
-	EndpointChannelPublicArchivedThreads        = func(cID string) string { return EndpointChannelThreads(cID) + "/archived/public" }
-	EndpointChannelPrivateArchivedThreads       = func(cID string) string { return EndpointChannelThreads(cID) + "/archived/private" }
-	EndpointChannelJoinedPrivateArchivedThreads = func(cID string) string { return EndpointChannel(cID) + "/users/@me/threads/archived/private" }
-	EndpointChannelPermissions                  = func(cID string) string { return EndpointChannels + cID + "/permissions" }
-	EndpointChannelPermission                   = func(cID, tID string) string { return EndpointChannels + cID + "/permissions/" + tID }
-	EndpointChannelInvites                      = func(cID string) string { return EndpointChannels + cID + "/invites" }
-	EndpointChannelTyping                       = func(cID string) string { return EndpointChannels + cID + "/typing" }
-	EndpointChannelMessages                     = func(cID string) string { return EndpointChannels + cID + "/messages" }
-	EndpointChannelMessage                      = func(cID, mID string) string { return EndpointChannels + cID + "/messages/" + mID }
-	EndpointChannelMessageThread                = func(cID, mID string) string { return EndpointChannelMessage(cID, mID) + "/threads" }
-	EndpointChannelMessagesBulkDelete           = func(cID string) string { return EndpointChannel(cID) + "/messages/bulk-delete" }
-	EndpointChannelMessagesPins                 = func(cID string) string { return EndpointChannel(cID) + "/pins" }
-	EndpointChannelMessagePin                   = func(cID, mID string) string { return EndpointChannel(cID) + "/pins/" + mID }
-	EndpointChannelMessageCrosspost             = func(cID, mID string) string { return EndpointChannel(cID) + "/messages/" + mID + "/crosspost" }
-	EndpointChannelFollow                       = func(cID string) string { return EndpointChannel(cID) + "/followers" }
-	EndpointThreadMembers                       = func(tID string) string { return EndpointChannel(tID) + "/thread-members" }
-	EndpointThreadMember                        = func(tID, mID string) string { return EndpointThreadMembers(tID) + "/" + mID }
+	EndpointChannel                             = func(cID Snowflake) string { return EndpointChannels + string(cID) }
+	EndpointChannelThreads                      = func(cID Snowflake) string { return EndpointChannel(cID) + "/threads" }
+	EndpointChannelActiveThreads                = func(cID Snowflake) string { return EndpointChannelThreads(cID) + "/active" }
+	EndpointChannelPublicArchivedThreads        = func(cID Snowflake) string { return EndpointChannelThreads(cID) + "/archived/public" }
+	EndpointChannelPrivateArchivedThreads       = func(cID Snowflake) string { return EndpointChannelThreads(cID) + "/archived/private" }
+	EndpointChannelJoinedPrivateArchivedThreads = func(cID Snowflake) string { return EndpointChannel(cID) + "/users/@me/threads/archived/private" }
+	EndpointChannelPermissions                  = func(cID Snowflake) string { return EndpointChannels + string(cID) + "/permissions" }
+	EndpointChannelPermission                   = func(cID, tID Snowflake) string {
+		return EndpointChannels + string(cID) + "/permissions/" + string(tID)
+	}
+	EndpointChannelInvites            = func(cID Snowflake) string { return EndpointChannels + string(cID) + "/invites" }
+	EndpointChannelTyping             = func(cID Snowflake) string { return EndpointChannels + string(cID) + "/typing" }
+	EndpointChannelMessages           = func(cID Snowflake) string { return EndpointChannels + string(cID) + "/messages" }
+	EndpointChannelMessage            = func(cID, mID Snowflake) string { return EndpointChannels + string(cID) + "/messages/" + string(mID) }
+	EndpointChannelMessageThread      = func(cID, mID Snowflake) string { return EndpointChannelMessage(cID, mID) + "/threads" }
+	EndpointChannelMessagesBulkDelete = func(cID Snowflake) string { return EndpointChannel(cID) + "/messages/bulk-delete" }
+	EndpointChannelMessagesPins       = func(cID Snowflake) string { return EndpointChannel(cID) + "/pins" }
+	EndpointChannelMessagePin         = func(cID, mID Snowflake) string { return EndpointChannel(cID) + "/pins/" + string(mID) }
+	EndpointChannelMessageCrosspost   = func(cID, mID Snowflake) string {
+		return EndpointChannel(cID) + "/messages/" + string(mID) + "/crosspost"
+	}
+	EndpointChannelFollow = func(cID Snowflake) string { return EndpointChannel(cID) + "/followers" }
+	EndpointThreadMembers = func(tID Snowflake) string { return EndpointChannel(tID) + "/thread-members" }
+	EndpointThreadMember  = func(tID, mID Snowflake) string { return EndpointThreadMembers(tID) + "/" + string(mID) }
 
-	EndpointGroupIcon = func(cID, hash string) string { return EndpointCDNChannelIcons + cID + "/" + hash + ".png" }
+	EndpointGroupIcon = func(cID Snowflake, hash string) string {
+		return EndpointCDNChannelIcons + string(cID) + "/" + hash + ".png"
+	}
 
-	EndpointSticker            = func(sID string) string { return EndpointStickers + sID }
+	EndpointSticker            = func(sID Snowflake) string { return EndpointStickers + string(sID) }
 	EndpointNitroStickersPacks = EndpointAPI + "/sticker-packs"
 
-	EndpointChannelWebhooks = func(cID string) string { return EndpointChannel(cID) + "/webhooks" }
-	EndpointWebhook         = func(wID string) string { return EndpointWebhooks + wID }
-	EndpointWebhookToken    = func(wID, token string) string { return EndpointWebhooks + wID + "/" + token }
-	EndpointWebhookMessage  = func(wID, token, messageID string) string {
-		return EndpointWebhookToken(wID, token) + "/messages/" + messageID
+	EndpointChannelWebhooks = func(cID Snowflake) string { return EndpointChannel(cID) + "/webhooks" }
+	EndpointWebhook         = func(wID Snowflake) string { return EndpointWebhooks + string(wID) }
+	EndpointWebhookToken    = func(wID Snowflake, token string) string { return EndpointWebhooks + string(wID) + "/" + token }
+	EndpointWebhookMessage  = func(wID Snowflake, token string, messageID Snowflake) string {
+		return EndpointWebhookToken(wID, token) + "/messages/" + string(messageID)
 	}
 
-	EndpointMessageReactionsAll = func(cID, mID string) string {
+	EndpointMessageReactionsAll = func(cID, mID Snowflake) string {
 		return EndpointChannelMessage(cID, mID) + "/reactions"
 	}
-	EndpointMessageReactions = func(cID, mID, eID string) string {
-		return EndpointChannelMessage(cID, mID) + "/reactions/" + eID
+	EndpointMessageReactions = func(cID, mID, eID Snowflake) string {
+		return EndpointChannelMessage(cID, mID) + "/reactions/" + string(eID)
 	}
-	EndpointMessageReaction = func(cID, mID, eID, uID string) string {
-		return EndpointMessageReactions(cID, mID, eID) + "/" + uID
+	EndpointMessageReaction = func(cID, mID, eID, uID Snowflake) string {
+		return EndpointMessageReactions(cID, mID, eID) + "/" + string(uID)
 	}
 
-	EndpointApplicationGlobalCommands = func(aID string) string {
+	EndpointApplicationGlobalCommands = func(aID Snowflake) string {
 		return EndpointApplication(aID) + "/commands"
 	}
-	EndpointApplicationGlobalCommand = func(aID, cID string) string {
-		return EndpointApplicationGlobalCommands(aID) + "/" + cID
+	EndpointApplicationGlobalCommand = func(aID, cID Snowflake) string {
+		return EndpointApplicationGlobalCommands(aID) + "/" + string(cID)
 	}
 
-	EndpointApplicationGuildCommands = func(aID, gID string) string {
-		return EndpointApplication(aID) + "/guilds/" + gID + "/commands"
+	EndpointApplicationGuildCommands = func(aID, gID Snowflake) string {
+		return EndpointApplication(aID) + "/guilds/" + string(gID) + "/commands"
 	}
-	EndpointApplicationGuildCommand = func(aID, gID, cID string) string {
-		return EndpointApplicationGuildCommands(aID, gID) + "/" + cID
+	EndpointApplicationGuildCommand = func(aID, gID, cID Snowflake) string {
+		return EndpointApplicationGuildCommands(aID, gID) + "/" + string(cID)
 	}
-	EndpointApplicationCommandPermissions = func(aID, gID, cID string) string {
+	EndpointApplicationCommandPermissions = func(aID, gID, cID Snowflake) string {
 		return EndpointApplicationGuildCommand(aID, gID, cID) + "/permissions"
 	}
-	EndpointApplicationCommandsGuildPermissions = func(aID, gID string) string {
+	EndpointApplicationCommandsGuildPermissions = func(aID, gID Snowflake) string {
 		return EndpointApplicationGuildCommands(aID, gID) + "/permissions"
 	}
-	EndpointInteraction = func(aID, iToken string) string {
-		return EndpointAPI + "interactions/" + aID + "/" + iToken
+	EndpointInteraction = func(aID Snowflake, iToken string) string {
+		return EndpointAPI + "interactions/" + string(aID) + "/" + iToken
 	}
-	EndpointInteractionResponse = func(iID, iToken string) string {
+	EndpointInteractionResponse = func(iID Snowflake, iToken string) string {
 		return EndpointInteraction(iID, iToken) + "/callback"
 	}
-	EndpointInteractionResponseActions = func(aID, iToken string) string {
+	EndpointInteractionResponseActions = func(aID Snowflake, iToken string) string {
 		return EndpointWebhookMessage(aID, iToken, "@original")
 	}
-	EndpointFollowupMessage = func(aID, iToken string) string {
+	EndpointFollowupMessage = func(aID Snowflake, iToken string) string {
 		return EndpointWebhookToken(aID, iToken)
 	}
-	EndpointFollowupMessageActions = func(aID, iToken, mID string) string {
+	EndpointFollowupMessageActions = func(aID Snowflake, iToken string, mID Snowflake) string {
 		return EndpointWebhookMessage(aID, iToken, mID)
 	}
 
 	EndpointGuildCreate = EndpointAPI + "guilds"
 
-	EndpointInvite = func(iID string) string { return EndpointAPI + "invites/" + iID }
+	EndpointInvite = func(code string) string { return EndpointAPI + "invites/" + code }
 
-	EndpointEmoji         = func(eID string) string { return EndpointCDN + "emojis/" + eID + ".png" }
-	EndpointEmojiAnimated = func(eID string) string { return EndpointCDN + "emojis/" + eID + ".gif" }
+	EndpointEmoji         = func(eID Snowflake) string { return EndpointCDN + "emojis/" + string(eID) + ".png" }
+	EndpointEmojiAnimated = func(eID Snowflake) string { return EndpointCDN + "emojis/" + string(eID) + ".gif" }
 
 	EndpointApplications                      = EndpointAPI + "applications"
-	EndpointApplication                       = func(aID string) string { return EndpointApplications + "/" + aID }
-	EndpointApplicationRoleConnectionMetadata = func(aID string) string { return EndpointApplication(aID) + "/role-connections/metadata" }
+	EndpointApplication                       = func(aID Snowflake) string { return EndpointApplications + "/" + string(aID) }
+	EndpointApplicationRoleConnectionMetadata = func(aID Snowflake) string { return EndpointApplication(aID) + "/role-connections/metadata" }
 
 	EndpointOAuth2                  = EndpointAPI + "oauth2/"
 	EndpointOAuth2Applications      = EndpointOAuth2 + "applications"
-	EndpointOAuth2Application       = func(aID string) string { return EndpointOAuth2Applications + "/" + aID }
-	EndpointOAuth2ApplicationsBot   = func(aID string) string { return EndpointOAuth2Applications + "/" + aID + "/bot" }
-	EndpointOAuth2ApplicationAssets = func(aID string) string { return EndpointOAuth2Applications + "/" + aID + "/assets" }
+	EndpointOAuth2Application       = func(aID Snowflake) string { return EndpointOAuth2Applications + "/" + string(aID) }
+	EndpointOAuth2ApplicationsBot   = func(aID Snowflake) string { return EndpointOAuth2Applications + "/" + string(aID) + "/bot" }
+	EndpointOAuth2ApplicationAssets = func(aID Snowflake) string { return EndpointOAuth2Applications + "/" + string(aID) + "/assets" }
 
 	// TODO: Deprecated, remove in the next release
 	EndpointOauth2                  = EndpointOAuth2

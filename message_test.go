@@ -31,7 +31,7 @@ func TestContentWithMoreMentionsReplaced(t *testing.T) {
 	m := &Message{
 		Content:      "<@&role> <@!user> <@user> <#channel>",
 		ChannelID:    "channel",
-		MentionRoles: []string{"role"},
+		MentionRoles: []Snowflake{"role"},
 		Mentions:     []*User{user},
 	}
 	if result, _ := m.ContentWithMoreMentionsReplaced(s); result != "@Role Name @User Nick @User Name #Channel Name" {

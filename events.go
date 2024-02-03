@@ -62,9 +62,9 @@ type ChannelDelete struct {
 
 // ChannelPinsUpdate stores data for a ChannelPinsUpdate event.
 type ChannelPinsUpdate struct {
-	LastPinTimestamp string `json:"last_pin_timestamp"`
-	ChannelID        string `json:"channel_id"`
-	GuildID          string `json:"guild_id,omitempty"`
+	LastPinTimestamp string    `json:"last_pin_timestamp"`
+	ChannelID        Snowflake `json:"channel_id"`
+	GuildID          Snowflake `json:"guild_id,omitempty"`
 }
 
 // ThreadCreate is the data for a ThreadCreate event.
@@ -87,11 +87,11 @@ type ThreadDelete struct {
 // ThreadListSync is the data for a ThreadListSync event.
 type ThreadListSync struct {
 	// The id of the guild
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 	// The parent channel ids whose threads are being synced.
 	// If omitted, then threads were synced for the entire guild.
 	// This array may contain channel_ids that have no active threads as well, so you know to clear that data.
-	ChannelIDs []string `json:"channel_ids"`
+	ChannelIDs []Snowflake `json:"channel_ids"`
 	// All active threads in the given channels that the current user can access
 	Threads []*Channel `json:"threads"`
 	// All thread member objects from the synced threads for the current user,
@@ -102,16 +102,16 @@ type ThreadListSync struct {
 // ThreadMemberUpdate is the data for a ThreadMemberUpdate event.
 type ThreadMemberUpdate struct {
 	*ThreadMember
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // ThreadMembersUpdate is the data for a ThreadMembersUpdate event.
 type ThreadMembersUpdate struct {
-	ID             string              `json:"id"`
-	GuildID        string              `json:"guild_id"`
+	ID             Snowflake           `json:"id"`
+	GuildID        Snowflake           `json:"guild_id"`
 	MemberCount    int                 `json:"member_count"`
 	AddedMembers   []AddedThreadMember `json:"added_members"`
-	RemovedMembers []string            `json:"removed_member_ids"`
+	RemovedMembers []Snowflake         `json:"removed_member_ids"`
 }
 
 // GuildCreate is the data for a GuildCreate event.
@@ -132,14 +132,14 @@ type GuildDelete struct {
 
 // GuildBanAdd is the data for a GuildBanAdd event.
 type GuildBanAdd struct {
-	User    *User  `json:"user"`
-	GuildID string `json:"guild_id"`
+	User    *User     `json:"user"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // GuildBanRemove is the data for a GuildBanRemove event.
 type GuildBanRemove struct {
-	User    *User  `json:"user"`
-	GuildID string `json:"guild_id"`
+	User    *User     `json:"user"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // GuildMemberAdd is the data for a GuildMemberAdd event.
@@ -170,19 +170,19 @@ type GuildRoleUpdate struct {
 
 // A GuildRoleDelete is the data for a GuildRoleDelete event.
 type GuildRoleDelete struct {
-	RoleID  string `json:"role_id"`
-	GuildID string `json:"guild_id"`
+	RoleID  Snowflake `json:"role_id"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // A GuildEmojisUpdate is the data for a guild emoji update event.
 type GuildEmojisUpdate struct {
-	GuildID string   `json:"guild_id"`
-	Emojis  []*Emoji `json:"emojis"`
+	GuildID Snowflake `json:"guild_id"`
+	Emojis  []*Emoji  `json:"emojis"`
 }
 
 // A GuildMembersChunk is the data for a GuildMembersChunk event.
 type GuildMembersChunk struct {
-	GuildID    string      `json:"guild_id"`
+	GuildID    Snowflake   `json:"guild_id"`
 	Members    []*Member   `json:"members"`
 	ChunkIndex int         `json:"chunk_index"`
 	ChunkCount int         `json:"chunk_count"`
@@ -193,7 +193,7 @@ type GuildMembersChunk struct {
 
 // GuildIntegrationsUpdate is the data for a GuildIntegrationsUpdate event.
 type GuildIntegrationsUpdate struct {
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // StageInstanceEventCreate is the data for a StageInstanceEventCreate event.
@@ -228,16 +228,16 @@ type GuildScheduledEventDelete struct {
 
 // GuildScheduledEventUserAdd is the data for a GuildScheduledEventUserAdd event.
 type GuildScheduledEventUserAdd struct {
-	GuildScheduledEventID string `json:"guild_scheduled_event_id"`
-	UserID                string `json:"user_id"`
-	GuildID               string `json:"guild_id"`
+	GuildScheduledEventID Snowflake `json:"guild_scheduled_event_id"`
+	UserID                Snowflake `json:"user_id"`
+	GuildID               Snowflake `json:"guild_id"`
 }
 
 // GuildScheduledEventUserRemove is the data for a GuildScheduledEventUserRemove event.
 type GuildScheduledEventUserRemove struct {
-	GuildScheduledEventID string `json:"guild_scheduled_event_id"`
-	UserID                string `json:"user_id"`
-	GuildID               string `json:"guild_id"`
+	GuildScheduledEventID Snowflake `json:"guild_scheduled_event_id"`
+	UserID                Snowflake `json:"user_id"`
+	GuildID               Snowflake `json:"guild_id"`
 }
 
 // MessageCreate is the data for a MessageCreate event.
@@ -295,7 +295,7 @@ type PresencesReplace []*Presence
 // PresenceUpdate is the data for a PresenceUpdate event.
 type PresenceUpdate struct {
 	Presence
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // Resumed is the data for a Resumed event.
@@ -305,10 +305,10 @@ type Resumed struct {
 
 // TypingStart is the data for a TypingStart event.
 type TypingStart struct {
-	UserID    string `json:"user_id"`
-	ChannelID string `json:"channel_id"`
-	GuildID   string `json:"guild_id,omitempty"`
-	Timestamp int    `json:"timestamp"`
+	UserID    Snowflake `json:"user_id"`
+	ChannelID Snowflake `json:"channel_id"`
+	GuildID   Snowflake `json:"guild_id,omitempty"`
+	Timestamp int       `json:"timestamp"`
 }
 
 // UserUpdate is the data for a UserUpdate event.
@@ -318,9 +318,9 @@ type UserUpdate struct {
 
 // VoiceServerUpdate is the data for a VoiceServerUpdate event.
 type VoiceServerUpdate struct {
-	Token    string `json:"token"`
-	GuildID  string `json:"guild_id"`
-	Endpoint string `json:"endpoint"`
+	Token    string    `json:"token"`
+	GuildID  Snowflake `json:"guild_id"`
+	Endpoint string    `json:"endpoint"`
 }
 
 // VoiceStateUpdate is the data for a VoiceStateUpdate event.
@@ -332,15 +332,15 @@ type VoiceStateUpdate struct {
 
 // MessageDeleteBulk is the data for a MessageDeleteBulk event
 type MessageDeleteBulk struct {
-	Messages  []string `json:"ids"`
-	ChannelID string   `json:"channel_id"`
-	GuildID   string   `json:"guild_id"`
+	Messages  []Snowflake `json:"ids"`
+	ChannelID Snowflake   `json:"channel_id"`
+	GuildID   Snowflake   `json:"guild_id"`
 }
 
 // WebhooksUpdate is the data for a WebhooksUpdate event
 type WebhooksUpdate struct {
-	GuildID   string `json:"guild_id"`
-	ChannelID string `json:"channel_id"`
+	GuildID   Snowflake `json:"guild_id"`
+	ChannelID Snowflake `json:"channel_id"`
 }
 
 // InteractionCreate is the data for a InteractionCreate event

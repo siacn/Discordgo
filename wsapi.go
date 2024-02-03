@@ -189,7 +189,7 @@ func (s *Session) Open() error {
 	// XXX: can this be moved to when opening a voice connection?
 	if s.VoiceConnections == nil {
 		s.log(LogInformational, "creating new VoiceConnections map")
-		s.VoiceConnections = make(map[string]*VoiceConnection)
+		s.VoiceConnections = make(map[Snowflake]*VoiceConnection)
 	}
 
 	// Create listening chan outside of listen, as it needs to happen inside the
@@ -669,10 +669,10 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 // ------------------------------------------------------------------------------------------------
 
 type voiceChannelJoinData struct {
-	GuildID   *string `json:"guild_id"`
-	ChannelID *string `json:"channel_id"`
-	SelfMute  bool    `json:"self_mute"`
-	SelfDeaf  bool    `json:"self_deaf"`
+	GuildID   *Snowflake `json:"guild_id"`
+	ChannelID *Snowflake `json:"channel_id"`
+	SelfMute  bool       `json:"self_mute"`
+	SelfDeaf  bool       `json:"self_deaf"`
 }
 
 type voiceChannelJoinOp struct {
@@ -682,16 +682,16 @@ type voiceChannelJoinOp struct {
 
 // ChannelVoiceJoin joins the session user to a voice channel.
 //
-//    gID     : Guild ID of the channel to join.
-//    cID     : Channel ID of the channel to join.
-//    mute    : If true, you will be set to muted upon joining.
-//    deaf    : If true, you will be set to deafened upon joining.
-func (s *Session) ChannelVoiceJoin(gID, cID string, mute, deaf bool) (voice *VoiceConnection, err error) {
+//	gID     : Guild ID of the channel to join.
+//	cID     : Channel ID of the channel to join.
+//	mute    : If true, you will be set to muted upon joining.
+//	deaf    : If true, you will be set to deafened upon joining.
+func (s *Session) ChannelVoiceJoin(gID, cID Snowflake, mute, deaf bool) (voice *VoiceConnection, err error) {
 
 	s.log(LogInformational, "called")
 
 	s.RLock()
-	voice, _ = s.VoiceConnections[gID]
+	voice = s.VoiceConnections[gID]
 	s.RUnlock()
 
 	if voice == nil {
@@ -729,15 +729,15 @@ func (s *Session) ChannelVoiceJoin(gID, cID string, mute, deaf bool) (voice *Voi
 //
 // This should only be used when the VoiceServerUpdate will be intercepted and used elsewhere.
 //
-//    gID     : Guild ID of the channel to join.
-//    cID     : Channel ID of the channel to join, leave empty to disconnect.
-//    mute    : If true, you will be set to muted upon joining.
-//    deaf    : If true, you will be set to deafened upon joining.
-func (s *Session) ChannelVoiceJoinManual(gID, cID string, mute, deaf bool) (err error) {
+//	gID     : Guild ID of the channel to join.
+//	cID     : Channel ID of the channel to join, leave empty to disconnect.
+//	mute    : If true, you will be set to muted upon joining.
+//	deaf    : If true, you will be set to deafened upon joining.
+func (s *Session) ChannelVoiceJoinManual(gID, cID Snowflake, mute, deaf bool) (err error) {
 
 	s.log(LogInformational, "called")
 
-	var channelID *string
+	var channelID *Snowflake
 	if cID == "" {
 		channelID = nil
 	} else {
@@ -828,7 +828,7 @@ func (s *Session) identify() error {
 
 	// TODO: This is a temporary block of code to help
 	// maintain backwards compatibility
-	if s.Compress == false {
+	if !s.Compress {
 		s.Identify.Compress = false
 	}
 

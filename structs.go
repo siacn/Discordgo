@@ -17,6 +17,8 @@ import (
 	"math"
 	"net/http"
 	"regexp"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -88,7 +90,7 @@ type Session struct {
 	UDPReady bool // NOTE: Deprecated
 
 	// Stores a mapping of guild id's to VoiceConnections
-	VoiceConnections map[string]*VoiceConnection
+	VoiceConnections map[Snowflake]*VoiceConnection
 
 	// Managed state object, updated internally with events when
 	// StateEnabled is true.
@@ -136,26 +138,45 @@ type Session struct {
 	wsMutex sync.Mutex
 }
 
+type Snowflake string
+
+func (s *Snowflake) UnmarshalJSON(bytes []byte) error {
+	val := string(bytes)
+	if val == "null" {
+		return nil
+	}
+	if strings.HasPrefix(val, "\"") && strings.HasSuffix(val, "\"") {
+		*s = Snowflake(strings.Trim(val, "\""))
+		return nil
+	}
+	i, err := strconv.ParseUint(val, 10, 64)
+	if err != nil {
+		return fmt.Errorf("%q is not a valid Snowflake", val)
+	}
+	*s = Snowflake(strconv.FormatUint(i, 10))
+	return nil
+}
+
 // Application stores values for a Discord Application
 type Application struct {
-	ID                  string   `json:"id,omitempty"`
-	Name                string   `json:"name"`
-	Icon                string   `json:"icon,omitempty"`
-	Description         string   `json:"description,omitempty"`
-	RPCOrigins          []string `json:"rpc_origins,omitempty"`
-	BotPublic           bool     `json:"bot_public,omitempty"`
-	BotRequireCodeGrant bool     `json:"bot_require_code_grant,omitempty"`
-	TermsOfServiceURL   string   `json:"terms_of_service_url"`
-	PrivacyProxyURL     string   `json:"privacy_policy_url"`
-	Owner               *User    `json:"owner"`
-	Summary             string   `json:"summary"`
-	VerifyKey           string   `json:"verify_key"`
-	Team                *Team    `json:"team"`
-	GuildID             string   `json:"guild_id"`
-	PrimarySKUID        string   `json:"primary_sku_id"`
-	Slug                string   `json:"slug"`
-	CoverImage          string   `json:"cover_image"`
-	Flags               int      `json:"flags,omitempty"`
+	ID                  Snowflake `json:"id,omitempty"`
+	Name                string    `json:"name"`
+	Icon                string    `json:"icon,omitempty"`
+	Description         string    `json:"description,omitempty"`
+	RPCOrigins          []string  `json:"rpc_origins,omitempty"`
+	BotPublic           bool      `json:"bot_public,omitempty"`
+	BotRequireCodeGrant bool      `json:"bot_require_code_grant,omitempty"`
+	TermsOfServiceURL   string    `json:"terms_of_service_url"`
+	PrivacyProxyURL     string    `json:"privacy_policy_url"`
+	Owner               *User     `json:"owner"`
+	Summary             string    `json:"summary"`
+	VerifyKey           string    `json:"verify_key"`
+	Team                *Team     `json:"team"`
+	GuildID             Snowflake `json:"guild_id"`
+	PrimarySKUID        Snowflake `json:"primary_sku_id"`
+	Slug                string    `json:"slug"`
+	CoverImage          string    `json:"cover_image"`
+	Flags               int       `json:"flags,omitempty"`
 }
 
 // ApplicationRoleConnectionMetadataType represents the type of application role connection metadata.
@@ -201,12 +222,12 @@ type UserConnection struct {
 
 // Integration stores integration information
 type Integration struct {
-	ID                string             `json:"id"`
+	ID                Snowflake          `json:"id"`
 	Name              string             `json:"name"`
 	Type              string             `json:"type"`
 	Enabled           bool               `json:"enabled"`
 	Syncing           bool               `json:"syncing"`
-	RoleID            string             `json:"role_id"`
+	RoleID            Snowflake          `json:"role_id"`
 	EnableEmoticons   bool               `json:"enable_emoticons"`
 	ExpireBehavior    ExpireBehavior     `json:"expire_behavior"`
 	ExpireGracePeriod int                `json:"expire_grace_period"`
@@ -329,11 +350,11 @@ const (
 // A Channel holds all data related to an individual Discord channel.
 type Channel struct {
 	// The ID of the channel.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The ID of the guild to which the channel belongs, if it is in a guild.
 	// Else, this ID is empty (e.g. DM channels).
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 
 	// The name of the channel.
 	Name string `json:"name"`
@@ -346,7 +367,7 @@ type Channel struct {
 
 	// The ID of the last message sent in the channel. This is not
 	// guaranteed to be an ID of a valid message.
-	LastMessageID string `json:"last_message_id"`
+	LastMessageID Snowflake `json:"last_message_id"`
 
 	// The timestamp of the last pinned message in the channel.
 	// nil if the channel has no pinned messages.
@@ -383,17 +404,17 @@ type Channel struct {
 	UserLimit int `json:"user_limit"`
 
 	// The ID of the parent channel, if the channel is under a category. For threads - id of the channel thread was created in.
-	ParentID string `json:"parent_id"`
+	ParentID Snowflake `json:"parent_id"`
 
 	// Amount of seconds a user has to wait before sending another message or creating another thread (0-21600)
 	// bots, as well as users with the permission manage_messages or manage_channel, are unaffected
 	RateLimitPerUser int `json:"rate_limit_per_user"`
 
 	// ID of the creator of the group DM or thread
-	OwnerID string `json:"owner_id"`
+	OwnerID Snowflake `json:"owner_id"`
 
 	// ApplicationID of the DM creator Zeroed if guild channel or not a bot user
-	ApplicationID string `json:"application_id"`
+	ApplicationID Snowflake `json:"application_id"`
 
 	// Thread-specific fields not needed by other channels
 	ThreadMetadata *ThreadMetadata `json:"thread_metadata,omitempty"`
@@ -410,7 +431,7 @@ type Channel struct {
 	AvailableTags []ForumTag `json:"available_tags"`
 
 	// The IDs of the set of tags that have been applied to a thread in a forum channel.
-	AppliedTags []string `json:"applied_tags"`
+	AppliedTags []Snowflake `json:"applied_tags"`
 
 	// Emoji to use as the default reaction to a forum post.
 	DefaultReactionEmoji ForumDefaultReaction `json:"default_reaction_emoji"`
@@ -447,7 +468,7 @@ type ChannelEdit struct {
 	Bitrate                       int                    `json:"bitrate,omitempty"`
 	UserLimit                     int                    `json:"user_limit,omitempty"`
 	PermissionOverwrites          []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
-	ParentID                      string                 `json:"parent_id,omitempty"`
+	ParentID                      Snowflake              `json:"parent_id,omitempty"`
 	RateLimitPerUser              *int                   `json:"rate_limit_per_user,omitempty"`
 	Flags                         *ChannelFlags          `json:"flags,omitempty"`
 	DefaultThreadRateLimitPerUser *int                   `json:"default_thread_rate_limit_per_user,omitempty"`
@@ -467,13 +488,13 @@ type ChannelEdit struct {
 	DefaultForumLayout   *ForumLayout          `json:"default_forum_layout,omitempty"`
 
 	// NOTE: forum threads only
-	AppliedTags *[]string `json:"applied_tags,omitempty"`
+	AppliedTags *[]Snowflake `json:"applied_tags,omitempty"`
 }
 
 // A ChannelFollow holds data returned after following a news channel
 type ChannelFollow struct {
-	ChannelID string `json:"channel_id"`
-	WebhookID string `json:"webhook_id"`
+	ChannelID Snowflake `json:"channel_id"`
+	WebhookID Snowflake `json:"webhook_id"`
 }
 
 // PermissionOverwriteType represents the type of resource on which
@@ -488,7 +509,7 @@ const (
 
 // A PermissionOverwrite holds permission overwrite data for a Channel
 type PermissionOverwrite struct {
-	ID    string                  `json:"id"`
+	ID    Snowflake               `json:"id"`
 	Type  PermissionOverwriteType `json:"type"`
 	Deny  int64                   `json:"deny,string"`
 	Allow int64                   `json:"allow,string"`
@@ -524,9 +545,9 @@ type ThreadMetadata struct {
 // NOTE: ID and UserID are empty (omitted) on the member sent within each thread in the GUILD_CREATE event.
 type ThreadMember struct {
 	// The id of the thread
-	ID string `json:"id,omitempty"`
+	ID Snowflake `json:"id,omitempty"`
 	// The id of the user
-	UserID string `json:"user_id,omitempty"`
+	UserID Snowflake `json:"user_id,omitempty"`
 	// The time the current user last joined the thread
 	JoinTimestamp time.Time `json:"join_timestamp"`
 	// Any user-thread settings, currently only used for notifications
@@ -555,30 +576,30 @@ type AddedThreadMember struct {
 // NOTE: Exactly one of EmojiID and EmojiName must be set.
 type ForumDefaultReaction struct {
 	// The id of a guild's custom emoji.
-	EmojiID string `json:"emoji_id,omitempty"`
+	EmojiID Snowflake `json:"emoji_id,omitempty"`
 	// The unicode character of the emoji.
 	EmojiName string `json:"emoji_name,omitempty"`
 }
 
 // ForumTag represents a tag that is able to be applied to a thread in a forum channel.
 type ForumTag struct {
-	ID        string `json:"id,omitempty"`
-	Name      string `json:"name"`
-	Moderated bool   `json:"moderated"`
-	EmojiID   string `json:"emoji_id,omitempty"`
-	EmojiName string `json:"emoji_name,omitempty"`
+	ID        Snowflake `json:"id,omitempty"`
+	Name      string    `json:"name"`
+	Moderated bool      `json:"moderated"`
+	EmojiID   Snowflake `json:"emoji_id,omitempty"`
+	EmojiName string    `json:"emoji_name,omitempty"`
 }
 
 // Emoji struct holds data related to Emoji's
 type Emoji struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Roles         []string `json:"roles"`
-	User          *User    `json:"user"`
-	RequireColons bool     `json:"require_colons"`
-	Managed       bool     `json:"managed"`
-	Animated      bool     `json:"animated"`
-	Available     bool     `json:"available"`
+	ID            Snowflake `json:"id"`
+	Name          string    `json:"name"`
+	Roles         []string  `json:"roles"`
+	User          *User     `json:"user"`
+	RequireColons bool      `json:"require_colons"`
+	Managed       bool      `json:"managed"`
+	Animated      bool      `json:"animated"`
+	Available     bool      `json:"available"`
 }
 
 // EmojiRegex is the regex used to find and identify emojis in messages
@@ -602,12 +623,12 @@ func (e *Emoji) MessageFormat() string {
 // APIName returns an correctly formatted API name for use in the MessageReactions endpoints.
 func (e *Emoji) APIName() string {
 	if e.ID != "" && e.Name != "" {
-		return e.Name + ":" + e.ID
+		return fmt.Sprintf("%s:%s", e.Name, e.ID)
 	}
 	if e.Name != "" {
 		return e.Name
 	}
-	return e.ID
+	return string(e.ID)
 }
 
 // EmojiParams represents parameters needed to create or update an Emoji.
@@ -643,28 +664,28 @@ const (
 
 // Sticker represents a sticker object that can be sent in a Message.
 type Sticker struct {
-	ID          string        `json:"id"`
-	PackID      string        `json:"pack_id"`
+	ID          Snowflake     `json:"id"`
+	PackID      Snowflake     `json:"pack_id"`
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Tags        string        `json:"tags"`
 	Type        StickerType   `json:"type"`
 	FormatType  StickerFormat `json:"format_type"`
 	Available   bool          `json:"available"`
-	GuildID     string        `json:"guild_id"`
+	GuildID     Snowflake     `json:"guild_id"`
 	User        *User         `json:"user"`
 	SortValue   int           `json:"sort_value"`
 }
 
 // StickerPack represents a pack of standard stickers.
 type StickerPack struct {
-	ID             string     `json:"id"`
+	ID             Snowflake  `json:"id"`
 	Stickers       []*Sticker `json:"stickers"`
 	Name           string     `json:"name"`
-	SKUID          string     `json:"sku_id"`
-	CoverStickerID string     `json:"cover_sticker_id"`
+	SKUID          Snowflake  `json:"sku_id"`
+	CoverStickerID Snowflake  `json:"cover_sticker_id"`
 	Description    string     `json:"description"`
-	BannerAssetID  string     `json:"banner_asset_id"`
+	BannerAssetID  Snowflake  `json:"banner_asset_id"`
 }
 
 // VerificationLevel type definition
@@ -724,7 +745,7 @@ const (
 // sometimes referred to as Servers in the Discord client.
 type Guild struct {
 	// The ID of the guild.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The name of the guild. (2–100 characters)
 	Name string `json:"name"`
@@ -737,10 +758,10 @@ type Guild struct {
 	Region string `json:"region"`
 
 	// The ID of the AFK voice channel.
-	AfkChannelID string `json:"afk_channel_id"`
+	AfkChannelID Snowflake `json:"afk_channel_id"`
 
 	// The user ID of the owner of the guild.
-	OwnerID string `json:"owner_id"`
+	OwnerID Snowflake `json:"owner_id"`
 
 	// If we are the owner of the guild
 	Owner bool `json:"owner"`
@@ -833,22 +854,22 @@ type Guild struct {
 	MfaLevel MfaLevel `json:"mfa_level"`
 
 	// The application id of the guild if bot created.
-	ApplicationID string `json:"application_id"`
+	ApplicationID Snowflake `json:"application_id"`
 
 	// Whether or not the Server Widget is enabled
 	WidgetEnabled bool `json:"widget_enabled"`
 
 	// The Channel ID for the Server Widget
-	WidgetChannelID string `json:"widget_channel_id"`
+	WidgetChannelID Snowflake `json:"widget_channel_id"`
 
 	// The Channel ID to which system messages are sent (eg join and leave messages)
-	SystemChannelID string `json:"system_channel_id"`
+	SystemChannelID Snowflake `json:"system_channel_id"`
 
 	// The System channel flags
 	SystemChannelFlags SystemChannelFlag `json:"system_channel_flags"`
 
 	// The ID of the rules channel ID, used for rules.
-	RulesChannelID string `json:"rules_channel_id"`
+	RulesChannelID Snowflake `json:"rules_channel_id"`
 
 	// the vanity url code for the guild
 	VanityURLCode string `json:"vanity_url_code"`
@@ -869,7 +890,7 @@ type Guild struct {
 	PreferredLocale string `json:"preferred_locale"`
 
 	// The id of the channel where admins and moderators of guilds with the "PUBLIC" feature receive notices from Discord
-	PublicUpdatesChannelID string `json:"public_updates_channel_id"`
+	PublicUpdatesChannelID Snowflake `json:"public_updates_channel_id"`
 
 	// The maximum amount of users in a video channel
 	MaxVideoChannelUsers int `json:"max_video_channel_users"`
@@ -890,7 +911,7 @@ type Guild struct {
 // A GuildPreview holds data related to a specific public Discord Guild, even if the user is not in the guild.
 type GuildPreview struct {
 	// The ID of the guild.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The name of the guild. (2–100 characters)
 	Name string `json:"name"`
@@ -935,13 +956,13 @@ func (g *GuildPreview) IconURL(size string) string {
 // https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event
 type GuildScheduledEvent struct {
 	// The ID of the scheduled event
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 	// The guild id which the scheduled event belongs to
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 	// The channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
-	ChannelID string `json:"channel_id"`
+	ChannelID Snowflake `json:"channel_id"`
 	// The id of the user that created the scheduled event
-	CreatorID string `json:"creator_id"`
+	CreatorID Snowflake `json:"creator_id"`
 	// The name of the scheduled event (1-100 characters)
 	Name string `json:"name"`
 	// The description of the scheduled event (1-1000 characters)
@@ -959,7 +980,7 @@ type GuildScheduledEvent struct {
 	// https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-field-requirements-by-entity-type
 	EntityType GuildScheduledEventEntityType `json:"entity_type"`
 	// The id of an entity associated with a guild scheduled event
-	EntityID string `json:"entity_id"`
+	EntityID Snowflake `json:"entity_id"`
 	// Additional metadata for the guild scheduled event
 	EntityMetadata GuildScheduledEventEntityMetadata `json:"entity_metadata"`
 	// The user that created the scheduled event
@@ -976,7 +997,7 @@ type GuildScheduledEvent struct {
 // https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
 type GuildScheduledEventParams struct {
 	// The channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
-	ChannelID string `json:"channel_id,omitempty"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
 	// The name of the scheduled event (1-100 characters)
 	Name string `json:"name,omitempty"`
 	// The description of the scheduled event (1-1000 characters)
@@ -1069,9 +1090,9 @@ const (
 // GuildScheduledEventUser is a user subscribed to a scheduled event.
 // https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-user-object
 type GuildScheduledEventUser struct {
-	GuildScheduledEventID string  `json:"guild_scheduled_event_id"`
-	User                  *User   `json:"user"`
-	Member                *Member `json:"member"`
+	GuildScheduledEventID Snowflake `json:"guild_scheduled_event_id"`
+	User                  *User     `json:"user"`
+	Member                *Member   `json:"member"`
 }
 
 // GuildOnboardingMode defines the criteria used to satisfy constraints that are required for enabling onboarding.
@@ -1090,7 +1111,7 @@ const (
 // https://discord.com/developers/docs/resources/guild#guild-onboarding-object
 type GuildOnboarding struct {
 	// ID of the guild this onboarding flow is part of.
-	GuildID string `json:"guild_id,omitempty"`
+	GuildID Snowflake `json:"guild_id,omitempty"`
 
 	// Prompts shown during onboarding and in the customize community (Channels & Roles) tab.
 	Prompts *[]GuildOnboardingPrompt `json:"prompts,omitempty"`
@@ -1121,7 +1142,7 @@ type GuildOnboardingPrompt struct {
 	// ID of the prompt.
 	// NOTE: always requires to be a valid snowflake (e.g. "0"), see
 	// https://github.com/discord/discord-api-docs/issues/6320 for more information.
-	ID string `json:"id,omitempty"`
+	ID Snowflake `json:"id,omitempty"`
 
 	// Type of the prompt.
 	Type GuildOnboardingPromptType `json:"type"`
@@ -1147,13 +1168,13 @@ type GuildOnboardingPrompt struct {
 // https://discord.com/developers/docs/resources/guild#guild-onboarding-object-prompt-option-structure
 type GuildOnboardingPromptOption struct {
 	// ID of the prompt option.
-	ID string `json:"id,omitempty"`
+	ID Snowflake `json:"id,omitempty"`
 
 	// IDs for channels a member is added to when the option is selected.
-	ChannelIDs []string `json:"channel_ids"`
+	ChannelIDs []Snowflake `json:"channel_ids"`
 
 	// IDs for roles assigned to a member when the option is selected.
-	RoleIDs []string `json:"role_ids"`
+	RoleIDs []Snowflake `json:"role_ids"`
 
 	// Emoji of the option.
 	// NOTE: when creating or updating a prompt option
@@ -1168,7 +1189,7 @@ type GuildOnboardingPromptOption struct {
 
 	// ID of the option's emoji.
 	// NOTE: only used when creating or updating a prompt option.
-	EmojiID string `json:"emoji_id,omitempty"`
+	EmojiID Snowflake `json:"emoji_id,omitempty"`
 	// Name of the option's emoji.
 	// NOTE: only used when creating or updating a prompt option.
 	EmojiName string `json:"emoji_name,omitempty"`
@@ -1192,7 +1213,7 @@ type GuildTemplate struct {
 	UsageCount int `json:"usage_count"`
 
 	// The ID of the user who created the template
-	CreatorID string `json:"creator_id"`
+	CreatorID Snowflake `json:"creator_id"`
 
 	// The user who created the template
 	Creator *User `json:"creator"`
@@ -1204,7 +1225,7 @@ type GuildTemplate struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	// The ID of the guild the template was based on
-	SourceGuildID string `json:"source_guild_id"`
+	SourceGuildID Snowflake `json:"source_guild_id"`
 
 	// The guild 'snapshot' this template contains
 	SerializedSourceGuild *Guild `json:"serialized_source_guild"`
@@ -1261,7 +1282,7 @@ func (g *Guild) BannerURL(size string) string {
 
 // A UserGuild holds a brief version of a Guild
 type UserGuild struct {
-	ID          string         `json:"id"`
+	ID          Snowflake      `json:"id"`
 	Name        string         `json:"name"`
 	Icon        string         `json:"icon"`
 	Owner       bool           `json:"owner"`
@@ -1304,17 +1325,17 @@ type GuildParams struct {
 	VerificationLevel           *VerificationLevel `json:"verification_level,omitempty"`
 	DefaultMessageNotifications int                `json:"default_message_notifications,omitempty"` // TODO: Separate type?
 	ExplicitContentFilter       int                `json:"explicit_content_filter,omitempty"`
-	AfkChannelID                string             `json:"afk_channel_id,omitempty"`
+	AfkChannelID                Snowflake          `json:"afk_channel_id,omitempty"`
 	AfkTimeout                  int                `json:"afk_timeout,omitempty"`
 	Icon                        string             `json:"icon,omitempty"`
-	OwnerID                     string             `json:"owner_id,omitempty"`
+	OwnerID                     Snowflake          `json:"owner_id,omitempty"`
 	Splash                      string             `json:"splash,omitempty"`
 	DiscoverySplash             string             `json:"discovery_splash,omitempty"`
 	Banner                      string             `json:"banner,omitempty"`
-	SystemChannelID             string             `json:"system_channel_id,omitempty"`
+	SystemChannelID             Snowflake          `json:"system_channel_id,omitempty"`
 	SystemChannelFlags          SystemChannelFlag  `json:"system_channel_flags,omitempty"`
-	RulesChannelID              string             `json:"rules_channel_id,omitempty"`
-	PublicUpdatesChannelID      string             `json:"public_updates_channel_id,omitempty"`
+	RulesChannelID              Snowflake          `json:"rules_channel_id,omitempty"`
+	PublicUpdatesChannelID      Snowflake          `json:"public_updates_channel_id,omitempty"`
 	PreferredLocale             Locale             `json:"preferred_locale,omitempty"`
 	Features                    []GuildFeature     `json:"features,omitempty"`
 	Description                 string             `json:"description,omitempty"`
@@ -1324,7 +1345,7 @@ type GuildParams struct {
 // A Role stores information about Discord guild member roles.
 type Role struct {
 	// The ID of the role.
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 
 	// The name of the role.
 	Name string `json:"name"`
@@ -1371,7 +1392,7 @@ func (r *Role) IconURL(size string) string {
 		return ""
 	}
 
-	URL := EndpointRoleIcon(r.ID, r.Icon)
+	URL := EndpointRoleIcon(string(r.ID), r.Icon)
 
 	if size != "" {
 		return URL + "?size=" + size
@@ -1416,9 +1437,9 @@ func (r Roles) Swap(i, j int) {
 
 // A VoiceState stores the voice states of Guilds
 type VoiceState struct {
-	GuildID                 string     `json:"guild_id"`
-	ChannelID               string     `json:"channel_id"`
-	UserID                  string     `json:"user_id"`
+	GuildID                 Snowflake  `json:"guild_id"`
+	ChannelID               Snowflake  `json:"channel_id"`
+	UserID                  Snowflake  `json:"user_id"`
 	Member                  *Member    `json:"member"`
 	SessionID               string     `json:"session_id"`
 	Deaf                    bool       `json:"deaf"`
@@ -1473,7 +1494,7 @@ type Assets struct {
 // member represents a certain user's presence in a guild.
 type Member struct {
 	// The guild ID on which the member exists.
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 
 	// The time at which the member joined the guild.
 	JoinedAt time.Time `json:"joined_at"`
@@ -1494,7 +1515,7 @@ type Member struct {
 	User *User `json:"user"`
 
 	// A list of IDs of the roles which are possessed by the member.
-	Roles []string `json:"roles"`
+	Roles []Snowflake `json:"roles"`
 
 	// When the user used their Nitro boost on the server
 	PremiumSince *time.Time `json:"premium_since"`
@@ -1512,7 +1533,7 @@ type Member struct {
 
 // Mention creates a member mention
 func (m *Member) Mention() string {
-	return "<@!" + m.User.ID + ">"
+	return fmt.Sprintf("<@!%s>", m.User.ID)
 }
 
 // AvatarURL returns the URL of the member's avatar
@@ -1588,15 +1609,15 @@ func (t *TooManyRequests) UnmarshalJSON(b []byte) error {
 
 // A ReadState stores data on the read state of channels.
 type ReadState struct {
-	MentionCount  int    `json:"mention_count"`
-	LastMessageID string `json:"last_message_id"`
-	ID            string `json:"id"`
+	MentionCount  int       `json:"mention_count"`
+	LastMessageID Snowflake `json:"last_message_id"`
+	ID            Snowflake `json:"id"`
 }
 
 // A GuildRole stores data for guild roles.
 type GuildRole struct {
-	Role    *Role  `json:"role"`
-	GuildID string `json:"guild_id"`
+	Role    *Role     `json:"role"`
+	GuildID Snowflake `json:"guild_id"`
 }
 
 // A GuildBan stores data for a guild ban.
@@ -1607,17 +1628,17 @@ type GuildBan struct {
 
 // AutoModerationRule stores data for an auto moderation rule.
 type AutoModerationRule struct {
-	ID              string                         `json:"id,omitempty"`
-	GuildID         string                         `json:"guild_id,omitempty"`
+	ID              Snowflake                      `json:"id,omitempty"`
+	GuildID         Snowflake                      `json:"guild_id,omitempty"`
 	Name            string                         `json:"name,omitempty"`
-	CreatorID       string                         `json:"creator_id,omitempty"`
+	CreatorID       Snowflake                      `json:"creator_id,omitempty"`
 	EventType       AutoModerationRuleEventType    `json:"event_type,omitempty"`
 	TriggerType     AutoModerationRuleTriggerType  `json:"trigger_type,omitempty"`
 	TriggerMetadata *AutoModerationTriggerMetadata `json:"trigger_metadata,omitempty"`
 	Actions         []AutoModerationAction         `json:"actions,omitempty"`
 	Enabled         *bool                          `json:"enabled,omitempty"`
-	ExemptRoles     *[]string                      `json:"exempt_roles,omitempty"`
-	ExemptChannels  *[]string                      `json:"exempt_channels,omitempty"`
+	ExemptRoles     *[]Snowflake                   `json:"exempt_roles,omitempty"`
+	ExemptChannels  *[]Snowflake                   `json:"exempt_channels,omitempty"`
 }
 
 // AutoModerationRuleEventType indicates in what event context a rule should be checked.
@@ -1686,7 +1707,7 @@ const (
 type AutoModerationActionMetadata struct {
 	// Channel to which user content should be logged.
 	// NOTE: should be only used with send alert message action type.
-	ChannelID string `json:"channel_id,omitempty"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
 
 	// Timeout duration in seconds (maximum of 2419200 - 4 weeks).
 	// NOTE: should be only used with timeout action type.
@@ -1701,8 +1722,8 @@ type AutoModerationAction struct {
 
 // A GuildEmbed stores data for a guild embed.
 type GuildEmbed struct {
-	Enabled   *bool  `json:"enabled,omitempty"`
-	ChannelID string `json:"channel_id,omitempty"`
+	Enabled   *bool     `json:"enabled,omitempty"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
 }
 
 // A GuildAuditLog stores data for a guild audit log.
@@ -1719,8 +1740,8 @@ type GuildAuditLog struct {
 type AuditLogEntry struct {
 	TargetID   string            `json:"target_id"`
 	Changes    []*AuditLogChange `json:"changes"`
-	UserID     string            `json:"user_id"`
-	ID         string            `json:"id"`
+	UserID     Snowflake         `json:"user_id"`
+	ID         Snowflake         `json:"id"`
 	ActionType *AuditLogAction   `json:"action_type"`
 	Options    *AuditLogOptions  `json:"options"`
 	Reason     string            `json:"reason"`
@@ -1888,13 +1909,13 @@ const (
 type AuditLogOptions struct {
 	DeleteMemberDays              string               `json:"delete_member_days"`
 	MembersRemoved                string               `json:"members_removed"`
-	ChannelID                     string               `json:"channel_id"`
-	MessageID                     string               `json:"message_id"`
+	ChannelID                     Snowflake            `json:"channel_id"`
+	MessageID                     Snowflake            `json:"message_id"`
 	Count                         string               `json:"count"`
-	ID                            string               `json:"id"`
+	ID                            Snowflake            `json:"id"`
 	Type                          *AuditLogOptionsType `json:"type"`
 	RoleName                      string               `json:"role_name"`
-	ApplicationID                 string               `json:"application_id"`
+	ApplicationID                 Snowflake            `json:"application_id"`
 	AutoModerationRuleName        string               `json:"auto_moderation_rule_name"`
 	AutoModerationRuleTriggerType string               `json:"auto_moderation_rule_trigger_type"`
 	IntegrationType               string               `json:"integration_type"`
@@ -2067,11 +2088,11 @@ type APIErrorMessage struct {
 
 // MessageReaction stores the data for a message reaction.
 type MessageReaction struct {
-	UserID    string `json:"user_id"`
-	MessageID string `json:"message_id"`
-	Emoji     Emoji  `json:"emoji"`
-	ChannelID string `json:"channel_id"`
-	GuildID   string `json:"guild_id,omitempty"`
+	UserID    Snowflake `json:"user_id"`
+	MessageID Snowflake `json:"message_id"`
+	Emoji     Emoji     `json:"emoji"`
+	ChannelID Snowflake `json:"channel_id"`
+	GuildID   Snowflake `json:"guild_id,omitempty"`
 }
 
 // GatewayBotResponse stores the data for the gateway/bot response
@@ -2105,7 +2126,7 @@ type Activity struct {
 	Type          ActivityType `json:"type"`
 	URL           string       `json:"url,omitempty"`
 	CreatedAt     time.Time    `json:"created_at"`
-	ApplicationID string       `json:"application_id,omitempty"`
+	ApplicationID Snowflake    `json:"application_id,omitempty"`
 	State         string       `json:"state,omitempty"`
 	Details       string       `json:"details,omitempty"`
 	Timestamps    TimeStamps   `json:"timestamps,omitempty"`
@@ -2124,7 +2145,7 @@ func (activity *Activity) UnmarshalJSON(b []byte) error {
 		Type          ActivityType `json:"type"`
 		URL           string       `json:"url,omitempty"`
 		CreatedAt     int64        `json:"created_at"`
-		ApplicationID string       `json:"application_id,omitempty"`
+		ApplicationID Snowflake    `json:"application_id,omitempty"`
 		State         string       `json:"state,omitempty"`
 		Details       string       `json:"details,omitempty"`
 		Timestamps    TimeStamps   `json:"timestamps,omitempty"`
@@ -2211,11 +2232,11 @@ type IdentifyProperties struct {
 // https://discord.com/developers/docs/resources/stage-instance#stage-instance-resource
 type StageInstance struct {
 	// The id of this Stage instance
-	ID string `json:"id"`
+	ID Snowflake `json:"id"`
 	// The guild id of the associated Stage channel
-	GuildID string `json:"guild_id"`
+	GuildID Snowflake `json:"guild_id"`
 	// The id of the associated Stage channel
-	ChannelID string `json:"channel_id"`
+	ChannelID Snowflake `json:"channel_id"`
 	// The topic of the Stage instance (1-120 characters)
 	Topic string `json:"topic"`
 	// The privacy level of the Stage instance
@@ -2224,13 +2245,13 @@ type StageInstance struct {
 	// Whether or not Stage Discovery is disabled (deprecated)
 	DiscoverableDisabled bool `json:"discoverable_disabled"`
 	// The id of the scheduled event for this Stage instance
-	GuildScheduledEventID string `json:"guild_scheduled_event_id"`
+	GuildScheduledEventID Snowflake `json:"guild_scheduled_event_id"`
 }
 
 // StageInstanceParams represents the parameters needed to create or edit a stage instance
 type StageInstanceParams struct {
 	// ChannelID represents the id of the Stage channel
-	ChannelID string `json:"channel_id,omitempty"`
+	ChannelID Snowflake `json:"channel_id,omitempty"`
 	// Topic of the Stage instance (1-120 characters)
 	Topic string `json:"topic,omitempty"`
 	// PrivacyLevel of the Stage instance (default GUILD_ONLY)

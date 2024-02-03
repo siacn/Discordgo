@@ -2,17 +2,17 @@ package discordgo
 
 // Webhook stores the data for a webhook.
 type Webhook struct {
-	ID        string      `json:"id"`
+	ID        Snowflake   `json:"id"`
 	Type      WebhookType `json:"type"`
-	GuildID   string      `json:"guild_id"`
-	ChannelID string      `json:"channel_id"`
+	GuildID   Snowflake   `json:"guild_id"`
+	ChannelID Snowflake   `json:"channel_id"`
 	User      *User       `json:"user"`
 	Name      string      `json:"name"`
 	Avatar    string      `json:"avatar"`
 	Token     string      `json:"token"`
 
 	// ApplicationID is the bot/OAuth2 application that created this webhook
-	ApplicationID string `json:"application_id,omitempty"`
+	ApplicationID Snowflake `json:"application_id,omitempty"`
 }
 
 // WebhookType is the type of Webhook (see WebhookType* consts) in the Webhook struct
