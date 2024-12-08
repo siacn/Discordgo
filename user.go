@@ -25,6 +25,7 @@ const (
 	UserFlagVerifiedBotDeveloper      UserFlags = 1 << 17
 	UserFlagDiscordCertifiedModerator UserFlags = 1 << 18
 	UserFlagBotHTTPInteractions       UserFlags = 1 << 19
+	UserFlagSpammer                   UserFlags = 1 << 20
 	UserFlagActiveBotDeveloper        UserFlags = 1 << 22
 )
 
