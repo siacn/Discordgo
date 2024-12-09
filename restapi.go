@@ -266,6 +266,12 @@ func (s *Session) RequestWithLockedBucket(method, urlStr, contentType string, b 
 	case http.StatusOK:
 	case http.StatusCreated:
 	case http.StatusNoContent:
+	case http.StatusInternalServerError:
+		fallthrough
+	case http.StatusServiceUnavailable:
+		fallthrough
+	case http.StatusGatewayTimeout:
+		fallthrough
 	case http.StatusBadGateway:
 		// Retry sending request if possible
 		if sequence < cfg.MaxRestRetries {
@@ -275,7 +281,7 @@ func (s *Session) RequestWithLockedBucket(method, urlStr, contentType string, b 
 		} else {
 			err = fmt.Errorf("Exceeded Max retries HTTP %s, %s", resp.Status, response)
 		}
-	case 429: // TOO MANY REQUESTS - Rate limiting
+	case http.StatusTooManyRequests:
 		rl := TooManyRequests{}
 		err = Unmarshal(response, &rl)
 		if err != nil {
