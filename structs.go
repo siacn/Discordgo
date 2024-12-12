@@ -2158,11 +2158,18 @@ type APIErrorMessage struct {
 	Message string `json:"message"`
 }
 
-// MessageReaction stores the data for a message reaction.
+// MessageReactionType is the type of reaction. Burst-type reactions are Super Reactions.
+type MessageReactionType int
+
+// Block contains all known MessageReactionType values.
+const (
+	MessageReactionTypeNormal MessageReactionType = 0
+	MessageReactionTypeBurst  MessageReactionType = 1
+)
+
+// MessageReaction stores partial data for a message reaction.
 type MessageReaction struct {
-	UserID    string `json:"user_id"`
 	MessageID string `json:"message_id"`
-	Emoji     Emoji  `json:"emoji"`
 	ChannelID string `json:"channel_id"`
 	GuildID   string `json:"guild_id,omitempty"`
 }
