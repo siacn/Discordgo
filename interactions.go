@@ -571,6 +571,7 @@ func (o ApplicationCommandInteractionDataOption) UserValue(s *Session) *User {
 type InteractionResponseType uint8
 
 // Interaction response types.
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
 const (
 	// InteractionResponsePong is for ACK ping event.
 	InteractionResponsePong InteractionResponseType = 1
@@ -586,6 +587,8 @@ const (
 	InteractionApplicationCommandAutocompleteResult InteractionResponseType = 8
 	// InteractionResponseModal is for responding to an interaction with a modal window.
 	InteractionResponseModal InteractionResponseType = 9
+	// InteractionResponseLaunchActivity is for launching the Activity associated with the app
+	InteractionResponseLaunchActivity InteractionResponseType = 12
 )
 
 // InteractionResponse represents a response for an interaction event.
@@ -615,6 +618,44 @@ type InteractionResponseData struct {
 
 	CustomID string `json:"custom_id,omitempty"`
 	Title    string `json:"title,omitempty"`
+}
+
+// InteractionCallbackResponse is returned on interaction callback
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-callback-interaction-callback-response-object
+type InteractionCallbackResponse struct {
+	Interaction InteractionCallback          `json:"interaction"`
+	Resource    *InteractionCallbackResource `json:"resource,omitempty"`
+}
+
+// InteractionCallback is returned as part of InteractionCallbackResponse
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-callback-interaction-callback-object
+type InteractionCallback struct {
+	ID                       string          `json:"id"`
+	Type                     InteractionType `json:"type"`
+	ActivityInstanceID       string          `json:"activity_instance_id,omitempty"`
+	ResponseMessageID        string          `json:"response_message_id,omitempty"`
+	ResponseMessageLoading   bool            `json:"response_message_loading,omitempty"`
+	ResponseMessageEphemeral bool            `json:"response_message_ephemeral,omitempty"`
+}
+
+// InteractionCallbackResource is returned as part of InteractionCallbackResponse.
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-callback-interaction-callback-resource-object
+type InteractionCallbackResource struct {
+	Type InteractionResponseType `json:"type"`
+
+	// ActivityInstance resource represents the Activity launched by this interaction
+	// Only present if Type is InteractionResponseLaunchActivity
+	ActivityInstance *InteractionCallbackActivityInstance `json:"activity_instance"`
+
+	// Message is only present if Type is either InteractionResponseChannelMessageWithSource or InteractionResponseUpdateMessage
+	Message *Message `json:"message"`
+}
+
+// InteractionCallbackActivityInstance represents the Activity launched by this interaction
+// Only present if InteractionCallbackResource.Type is InteractionResponseLaunchActivity
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-callback-interaction-callback-activity-instance-resource
+type InteractionCallbackActivityInstance struct {
+	ID string `json:"id"`
 }
 
 // VerifyInteraction implements message verification of the discord interactions api

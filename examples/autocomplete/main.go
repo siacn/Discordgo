@@ -73,7 +73,7 @@ var (
 			switch i.Type {
 			case discordgo.InteractionApplicationCommand:
 				data := i.ApplicationCommandData()
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: fmt.Sprintf(
@@ -120,7 +120,7 @@ var (
 					})
 				}
 
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 					Data: &discordgo.InteractionResponseData{
 						Choices: choices, // This is basically the whole purpose of autocomplete interaction - return custom options to the user.
@@ -135,7 +135,7 @@ var (
 			switch i.Type {
 			case discordgo.InteractionApplicationCommand:
 				data := i.ApplicationCommandData()
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: fmt.Sprintf(
@@ -206,7 +206,7 @@ var (
 					}
 				}
 
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionApplicationCommandAutocompleteResult,
 					Data: &discordgo.InteractionResponseData{
 						Choices: choices,

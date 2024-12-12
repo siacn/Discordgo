@@ -35,7 +35,7 @@ func handleEcho(s *discordgo.Session, i *discordgo.InteractionCreate, opts optio
 	}
 	builder.WriteString(opts["message"].StringValue())
 
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: builder.String(),

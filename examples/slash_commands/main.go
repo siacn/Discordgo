@@ -253,7 +253,7 @@ var (
 			if r, ok := responses[i.Locale]; ok {
 				response = r
 			}
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: response,
@@ -452,7 +452,7 @@ var (
 				content +=
 					"\nAlso... you can edit your response, wait 5 seconds and this message will be changed"
 			default:
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseType(i.ApplicationCommandData().Options[0].IntValue()),
 				})
 				if err != nil {
@@ -463,7 +463,7 @@ var (
 				return
 			}
 
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseType(i.ApplicationCommandData().Options[0].IntValue()),
 				Data: &discordgo.InteractionResponseData{
 					Content: content,

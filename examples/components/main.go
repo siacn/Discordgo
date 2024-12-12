@@ -36,7 +36,7 @@ func init() {
 var (
 	componentsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"fd_no": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Huh. I see, maybe some of these resources might help you?",
@@ -78,7 +78,7 @@ var (
 			}
 		},
 		"fd_yes": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Great! If you wanna know more or just have questions, feel free to visit Discord Devs and Discord Gophers server. " +
@@ -134,7 +134,7 @@ var (
 					},
 				}
 			}
-			err := s.InteractionRespond(i.Interaction, response)
+			_, err := s.InteractionRespond(i.Interaction, response)
 			if err != nil {
 				panic(err)
 			}
@@ -153,7 +153,7 @@ var (
 
 			const stackoverflowFormat = `https://stackoverflow.com/questions/tagged/%s`
 
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Here is your stackoverflow URL: " + fmt.Sprintf(stackoverflowFormat, strings.Join(data.Values, "+")),
@@ -173,7 +173,7 @@ var (
 			}
 		},
 		"channel_select": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "This is it. You've reached your destination. Your choice was <#" + i.MessageComponentData().Values[0] + ">\n" +
@@ -219,7 +219,7 @@ var (
 	}
 	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"buttons": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Are you comfortable with buttons and other message components?",
@@ -417,7 +417,7 @@ var (
 					},
 				}
 			}
-			err := s.InteractionRespond(i.Interaction, response)
+			_, err := s.InteractionRespond(i.Interaction, response)
 			if err != nil {
 				panic(err)
 			}

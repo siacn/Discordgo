@@ -43,7 +43,7 @@ var (
 	}
 	commandsHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"modals-survey": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseModal,
 				Data: &discordgo.InteractionResponseData{
 					CustomID: "modals_survey_" + i.Interaction.Member.User.ID,
@@ -95,7 +95,7 @@ func main() {
 				h(s, i)
 			}
 		case discordgo.InteractionModalSubmit:
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_, err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Thank you for taking your time to fill this survey",
