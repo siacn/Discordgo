@@ -483,10 +483,10 @@ type ChannelEdit struct {
 
 	// NOTE: threads only
 
-	Archived            *bool `json:"archived,omitempty"`
-	AutoArchiveDuration int   `json:"auto_archive_duration,omitempty"`
-	Locked              *bool `json:"locked,omitempty"`
-	Invitable           *bool `json:"invitable,omitempty"`
+	Archived            *bool                   `json:"archived,omitempty"`
+	AutoArchiveDuration ThreadArchiveDuration   `json:"auto_archive_duration,omitempty"`
+	Locked              *bool                   `json:"locked,omitempty"`
+	Invitable           *bool                   `json:"invitable,omitempty"`
 
 	// NOTE: forum channels only
 
@@ -523,13 +523,26 @@ type PermissionOverwrite struct {
 	Allow int64                   `json:"allow,string"`
 }
 
+// Threads will archive automatically after a period of inactivity.
+// That period can be set to a select few values.
+// ThreadArchiveDuration represents those values.
+type ThreadArchiveDuration int
+
+// The following are the possible durations.
+const (
+	ThreadArchiveDurationOneHour   =    60 // minutes
+	ThreadArchiveDurationOneDay    =  1440 // minutes
+	ThreadArchiveDurationThreeDays =  4320 // minutes
+	ThreadArchiveDurationOneWeek   = 10080 // minutes
+)
+
 // ThreadStart stores all parameters you can use with MessageThreadStartComplex or ThreadStartComplex
 type ThreadStart struct {
-	Name                string      `json:"name"`
-	AutoArchiveDuration int         `json:"auto_archive_duration,omitempty"`
-	Type                ChannelType `json:"type,omitempty"`
-	Invitable           bool        `json:"invitable"`
-	RateLimitPerUser    int         `json:"rate_limit_per_user,omitempty"`
+	Name                string                `json:"name"`
+	AutoArchiveDuration ThreadArchiveDuration `json:"auto_archive_duration,omitempty"`
+	Type                ChannelType           `json:"type,omitempty"`
+	Invitable           bool                  `json:"invitable"`
+	RateLimitPerUser    int                   `json:"rate_limit_per_user,omitempty"`
 
 	// NOTE: forum threads only
 	AppliedTags []string `json:"applied_tags,omitempty"`
@@ -540,7 +553,7 @@ type ThreadMetadata struct {
 	// Whether the thread is archived
 	Archived bool `json:"archived"`
 	// Duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
-	AutoArchiveDuration int `json:"auto_archive_duration"`
+	AutoArchiveDuration ThreadArchiveDuration `json:"auto_archive_duration"`
 	// Timestamp when the thread's archive status was last changed, used for calculating recent activity
 	ArchiveTimestamp time.Time `json:"archive_timestamp"`
 	// Whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can unarchive it
