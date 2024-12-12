@@ -77,5 +77,8 @@ go install
 Placeholder.
 
 
-# Next...
-More coming soon.
+# Creating a new Discord session
+
+After you have loaded your bot token you can then create the bot session using 
+
+```discord, err := discordgo.New("Bot " + "authentication token")```
