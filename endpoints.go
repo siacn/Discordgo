@@ -14,7 +14,7 @@ package discordgo
 import "strconv"
 
 // APIVersion is the Discord API version used for the REST and Websocket API.
-var APIVersion = "9"
+var APIVersion = "10"
 
 // Known Discord API Endpoints.
 var (
