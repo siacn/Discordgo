@@ -123,3 +123,19 @@ func iconURL(iconHash, staticIconURL, animatedIconURL, size string) string {
 	}
 	return URL
 }
+
+func runGoroutineWithRecover(f func(), recoverHandler func(interface{}), rerun bool) {
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				if recoverHandler != nil {
+					recoverHandler(err)
+				}
+				if rerun {
+					runGoroutineWithRecover(f, recoverHandler, rerun)
+				}
+			}
+		}()
+		f()
+	}()
+}
