@@ -62,22 +62,32 @@ func (s *Session) Open() error {
 		return ErrWSAlreadyOpen
 	}
 
+	sequence := atomic.LoadInt64(s.sequence)
+
+	var gateway string
 	// Get the gateway to use for the Websocket connection
-	if s.gateway == "" {
-		s.gateway, err = s.Gateway()
-		if err != nil {
-			return err
+	if sequence != 0 && s.sessionID != "" && s.resumeGatewayURL != "" {
+		s.log(LogDebug, "using resume gateway %s", s.resumeGatewayURL)
+		gateway = s.resumeGatewayURL
+	} else {
+		if s.gateway == "" {
+			s.gateway, err = s.Gateway()
+			if err != nil {
+				return err
+			}
 		}
 
-		// Add the version and encoding to the URL
-		s.gateway = s.gateway + "?v=" + APIVersion + "&encoding=json"
+		gateway = s.gateway
 	}
 
+	// Add the version and encoding to the URL
+	gateway += "?v=" + APIVersion + "&encoding=json"
+
 	// Connect to the Gateway
-	s.log(LogInformational, "connecting to gateway %s", s.gateway)
+	s.log(LogInformational, "connecting to gateway %s", gateway)
 	header := http.Header{}
 	header.Add("accept-encoding", "zlib")
-	s.wsConn, _, err = s.Dialer.Dial(s.gateway, header)
+	s.wsConn, _, err = s.Dialer.Dial(gateway, header)
 	if err != nil {
 		s.log(LogError, "error connecting to gateway %s, %s", s.gateway, err)
 		s.gateway = "" // clear cached gateway
@@ -123,7 +133,6 @@ func (s *Session) Open() error {
 
 	// Now we send either an Op 2 Identity if this is a brand new
 	// connection or Op 6 Resume if we are resuming an existing connection.
-	sequence := atomic.LoadInt64(s.sequence)
 	if s.sessionID == "" && sequence == 0 {
 
 		// Send Op 2 Identity Packet
@@ -616,15 +625,23 @@ func (s *Session) onEvent(messageType int, message []byte) (*Event, error) {
 	// Invalid Session
 	// Must respond with a Identify packet.
 	if e.Operation == 9 {
+		s.log(LogInformational, "Closing and reconnecting in response to Op9")
+		s.CloseWithCode(websocket.CloseServiceRestart)
 
-		s.log(LogInformational, "sending identify packet to gateway in response to Op9")
-
-		err = s.identify()
-		if err != nil {
-			s.log(LogWarning, "error sending gateway identify packet, %s, %s", s.gateway, err)
+		var resumable bool
+		if err := json.Unmarshal(e.RawData, &resumable); err != nil {
+			s.log(LogError, "error unmarshalling invalid session event, %s", err)
 			return e, err
 		}
 
+		if !resumable {
+			s.log(LogInformational, "Gateway session is not resumable, discarding its information")
+			s.resumeGatewayURL = ""
+			s.sessionID = ""
+			atomic.StoreInt64(s.sequence, 0)
+		}
+
+		s.reconnect()
 		return e, nil
 	}
 
