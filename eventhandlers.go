@@ -56,6 +56,7 @@ const (
 	messageReactionAddEventType                  = "MESSAGE_REACTION_ADD"
 	messageReactionRemoveEventType               = "MESSAGE_REACTION_REMOVE"
 	messageReactionRemoveAllEventType            = "MESSAGE_REACTION_REMOVE_ALL"
+	messageReactionRemoveEmojiEventType          = "MESSAGE_REACTION_REMOVE_EMOJI"
 	messageUpdateEventType                       = "MESSAGE_UPDATE"
 	presenceUpdateEventType                      = "PRESENCE_UPDATE"
 	presencesReplaceEventType                    = "PRESENCES_REPLACE"
@@ -1043,6 +1044,26 @@ func (eh messageReactionRemoveAllEventHandler) Handle(s *Session, i interface{})
 	}
 }
 
+// messageReactionRemoveEmojiEventHandler is an event handler for MessageReactionRemoveEmoji events.
+type messageReactionRemoveEmojiEventHandler func(*Session, *MessageReactionRemoveEmoji)
+
+// Type returns the event type for MessageReactionRemoveEmoji events.
+func (eh messageReactionRemoveEmojiEventHandler) Type() string {
+	return messageReactionRemoveEmojiEventType
+}
+
+// New returns a new instance of MessageReactionRemoveEmoji.
+func (eh messageReactionRemoveEmojiEventHandler) New() interface{} {
+	return &MessageReactionRemoveEmoji{}
+}
+
+// Handle is the handler for MessageReactionRemoveEmoji events.
+func (eh messageReactionRemoveEmojiEventHandler) Handle(s *Session, i interface{}) {
+	if t, ok := i.(*MessageReactionRemoveEmoji); ok {
+		eh(s, t)
+	}
+}
+
 // messageUpdateEventHandler is an event handler for MessageUpdate events.
 type messageUpdateEventHandler func(*Session, *MessageUpdate)
 
@@ -1540,6 +1561,8 @@ func handlerForInterface(handler interface{}) EventHandler {
 		return messageReactionRemoveEventHandler(v)
 	case func(*Session, *MessageReactionRemoveAll):
 		return messageReactionRemoveAllEventHandler(v)
+	case func(*Session, *MessageReactionRemoveEmoji):
+		return messageReactionRemoveEmojiEventHandler(v)
 	case func(*Session, *MessageUpdate):
 		return messageUpdateEventHandler(v)
 	case func(*Session, *PresenceUpdate):
@@ -1632,6 +1655,7 @@ func init() {
 	registerInterfaceProvider(messageReactionAddEventHandler(nil))
 	registerInterfaceProvider(messageReactionRemoveEventHandler(nil))
 	registerInterfaceProvider(messageReactionRemoveAllEventHandler(nil))
+	registerInterfaceProvider(messageReactionRemoveEmojiEventHandler(nil))
 	registerInterfaceProvider(messageUpdateEventHandler(nil))
 	registerInterfaceProvider(presenceUpdateEventHandler(nil))
 	registerInterfaceProvider(presencesReplaceEventHandler(nil))

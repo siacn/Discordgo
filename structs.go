@@ -2160,7 +2160,7 @@ type APIErrorMessage struct {
 
 // MessageReaction stores the data for a message reaction.
 type MessageReaction struct {
-	UserID    string `json:"user_id"`
+	UserID    string `json:"user_id,omitempty"` // NOTE: will not be present in MessageReactionRemoveEmoji event
 	MessageID string `json:"message_id"`
 	Emoji     Emoji  `json:"emoji"`
 	ChannelID string `json:"channel_id"`

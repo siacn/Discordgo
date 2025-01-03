@@ -309,6 +309,11 @@ type MessageReactionRemoveAll struct {
 	*MessageReaction
 }
 
+// MessageReactionRemoveEmoji is the data for a MessageReactionRemoveEmoji event.
+type MessageReactionRemoveEmoji struct {
+	*MessageReaction
+}
+
 // PresencesReplace is the data for a PresencesReplace event.
 type PresencesReplace []*Presence
 
