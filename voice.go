@@ -501,8 +501,6 @@ func (v *VoiceConnection) onEvent(message []byte) {
 	default:
 		v.log(LogDebug, "unknown voice operation, %d, %s", e.Operation, string(e.RawData))
 	}
-
-	return
 }
 
 type voiceHeartbeatOp struct {
@@ -787,7 +785,8 @@ func (v *VoiceConnection) opusSender(udpConn *net.UDPConn, close <-chan struct{}
 			sequence++
 		}
 
-		if (timestamp + uint32(size)) >= 0xFFFFFFFF {
+		// Check for overflow and reset timestamp if needed
+		if (timestamp + uint32(size)) < timestamp {
 			timestamp = 0
 		} else {
 			timestamp += uint32(size)
@@ -920,7 +919,7 @@ func (v *VoiceConnection) reconnect() {
 			wait = 600
 		}
 
-		if v.session.DataReady == false || v.session.wsConn == nil {
+		if !v.session.DataReady || v.session.wsConn == nil {
 			v.log(LogInformational, "cannot reconnect to channel %s with unready session", v.ChannelID)
 			continue
 		}

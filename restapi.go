@@ -297,7 +297,7 @@ func (s *Session) RequestWithLockedBucket(method, urlStr, contentType string, b 
 		}
 	case http.StatusUnauthorized:
 		if strings.Index(s.Token, "Bot ") != 0 {
-			s.log(LogInformational, ErrUnauthorized.Error())
+			s.log(LogInformational, "%s", ErrUnauthorized.Error())
 			err = ErrUnauthorized
 		}
 		fallthrough
@@ -1579,7 +1579,7 @@ func (s *Session) GuildTemplateCreate(guildID string, data *GuildTemplateParams,
 		return
 	}
 
-	err = unmarshal(body, &st)
+	unmarshal(body, &st)
 	return
 }
 
@@ -3600,7 +3600,7 @@ func (s *Session) Entitlements(appID string, filterOptions *EntitlementFilterOpt
 		if filterOptions.UserID != "" {
 			queryParams.Set("user_id", filterOptions.UserID)
 		}
-		if filterOptions.SkuIDs != nil && len(filterOptions.SkuIDs) > 0 {
+		if len(filterOptions.SkuIDs) > 0 {
 			queryParams.Set("sku_ids", strings.Join(filterOptions.SkuIDs, ","))
 		}
 		if filterOptions.Before != nil {
