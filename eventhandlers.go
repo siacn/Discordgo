@@ -62,6 +62,8 @@ const (
 	rateLimitEventType                           = "__RATE_LIMIT__"
 	readyEventType                               = "READY"
 	resumedEventType                             = "RESUMED"
+	subscriptionCreateEventType                  = "SUBSCRIPTION_CREATE"
+	subscriptionUpdateEventType                  = "SUBSCRIPTION_UPDATE"
 	stageInstanceEventCreateEventType            = "STAGE_INSTANCE_EVENT_CREATE"
 	stageInstanceEventDeleteEventType            = "STAGE_INSTANCE_EVENT_DELETE"
 	stageInstanceEventUpdateEventType            = "STAGE_INSTANCE_EVENT_UPDATE"
@@ -1158,6 +1160,46 @@ func (eh resumedEventHandler) Handle(s *Session, i interface{}) {
 	}
 }
 
+// subscriptionCreateEventHandler is an event handler for SubscriptionCreate events.
+type subscriptionCreateEventHandler func(*Session, *SubscriptionCreate)
+
+// Type returns the event type for SubscriptionCreate events.
+func (eh subscriptionCreateEventHandler) Type() string {
+	return subscriptionCreateEventType
+}
+
+// New returns a new instance of SubscriptionCreate.
+func (eh subscriptionCreateEventHandler) New() interface{} {
+	return &SubscriptionCreate{}
+}
+
+// Handle is the handler for SubscriptionCreate events.
+func (eh subscriptionCreateEventHandler) Handle(s *Session, i interface{}) {
+	if t, ok := i.(*SubscriptionCreate); ok {
+		eh(s, t)
+	}
+}
+
+// subscriptionUpdateEventHandler is an event handler for SubscriptionUpdate events.
+type subscriptionUpdateEventHandler func(*Session, *SubscriptionUpdate)
+
+// Type returns the event type for SubscriptionCreate events.
+func (eh subscriptionUpdateEventHandler) Type() string {
+	return subscriptionUpdateEventType
+}
+
+// New returns a new instance of SubscriptionUpdate.
+func (eh subscriptionUpdateEventHandler) New() interface{} {
+	return &SubscriptionUpdate{}
+}
+
+// Handle is the handler for SubscriptionUpdate events.
+func (eh subscriptionUpdateEventHandler) Handle(s *Session, i interface{}) {
+	if t, ok := i.(*SubscriptionUpdate); ok {
+		eh(s, t)
+	}
+}
+
 // stageInstanceEventCreateEventHandler is an event handler for StageInstanceEventCreate events.
 type stageInstanceEventCreateEventHandler func(*Session, *StageInstanceEventCreate)
 
@@ -1552,6 +1594,10 @@ func handlerForInterface(handler interface{}) EventHandler {
 		return readyEventHandler(v)
 	case func(*Session, *Resumed):
 		return resumedEventHandler(v)
+	case func(*Session, *SubscriptionCreate):
+		return subscriptionCreateEventHandler(v)
+	case func(*Session, *SubscriptionUpdate):
+		return subscriptionUpdateEventHandler(v)
 	case func(*Session, *StageInstanceEventCreate):
 		return stageInstanceEventCreateEventHandler(v)
 	case func(*Session, *StageInstanceEventDelete):
@@ -1637,6 +1683,8 @@ func init() {
 	registerInterfaceProvider(presencesReplaceEventHandler(nil))
 	registerInterfaceProvider(readyEventHandler(nil))
 	registerInterfaceProvider(resumedEventHandler(nil))
+	registerInterfaceProvider(subscriptionCreateEventHandler(nil))
+	registerInterfaceProvider(subscriptionUpdateEventHandler(nil))
 	registerInterfaceProvider(stageInstanceEventCreateEventHandler(nil))
 	registerInterfaceProvider(stageInstanceEventDeleteEventHandler(nil))
 	registerInterfaceProvider(stageInstanceEventUpdateEventHandler(nil))

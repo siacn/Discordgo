@@ -2457,6 +2457,9 @@ type Subscription struct {
 	// List of entitlements granted for this subscription
 	EntitlementIDs []string `json:"entitlement_ids"`
 
+	// List of SKUs that this user will be subscribed to at renewal
+	RenewalSKUIDs []string `json:"renewal_sku_ids,omitempty"`
+
 	// Start of the current subscription period
 	CurrentPeriodStart time.Time `json:"current_period_start"`
 

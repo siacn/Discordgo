@@ -461,3 +461,15 @@ type EntitlementUpdate struct {
 type EntitlementDelete struct {
 	*Entitlement
 }
+
+// SubscriptionCreate is the data for an SubscriptionCreate event.
+// https://discord.com/developers/docs/monetization/implementing-app-subscriptions#using-subscription-events-for-the-subscription-lifecycle
+type SubscriptionCreate struct {
+	*Subscription
+}
+
+// SubscriptionUpdate is the data for an SubscriptionUpdate event.
+// https://discord.com/developers/docs/monetization/implementing-app-subscriptions#using-subscription-events-for-the-subscription-lifecycle
+type SubscriptionUpdate struct {
+	*Subscription
+}
