@@ -1566,6 +1566,9 @@ type Member struct {
 	// The hash of the avatar for the guild member, if any.
 	Avatar string `json:"avatar"`
 
+	// The hash of the banner for the guild member, if any.
+	Banner string `json:"banner"`
+
 	// The underlying user on which the member is based.
 	User *User `json:"user"`
 
@@ -1608,6 +1611,22 @@ func (m *Member) AvatarURL(size string) string {
 	return avatarURL(m.Avatar, "", EndpointGuildMemberAvatar(m.GuildID, m.User.ID, m.Avatar),
 		EndpointGuildMemberAvatarAnimated(m.GuildID, m.User.ID, m.Avatar), size)
 
+}
+
+// BannerURL returns the URL of the member's banner image.
+//
+//	size:    The size of the desired banner image as a power of two
+//	         Image size can be any power of two between 16 and 4096.
+func (m *Member) BannerURL(size string) string {
+	if m.Banner == "" {
+		return m.User.BannerURL(size)
+	}
+	return bannerURL(
+		m.Banner,
+		EndpointGuildMemberBanner(m.GuildID, m.User.ID, m.Banner),
+		EndpointGuildMemberBannerAnimated(m.GuildID, m.User.ID, m.Banner),
+		size,
+	)
 }
 
 // DisplayName returns the member's guild nickname if they have one,

@@ -115,6 +115,12 @@ var (
 	EndpointGuildMemberAvatarAnimated = func(gId, uID, aID string) string {
 		return EndpointCDNGuilds + gId + "/users/" + uID + "/avatars/" + aID + ".gif"
 	}
+	EndpointGuildMemberBanner = func(gId, uID, hash string) string {
+		return EndpointCDNGuilds + gId + "/users/" + uID + "/banners/" + hash + ".png"
+	}
+	EndpointGuildMemberBannerAnimated = func(gId, uID, hash string) string {
+		return EndpointCDNGuilds + gId + "/users/" + uID + "/banners/" + hash + ".gif"
+	}
 
 	EndpointRoleIcon = func(rID, hash string) string {
 		return EndpointCDNRoleIcons + rID + "/" + hash + ".png"
