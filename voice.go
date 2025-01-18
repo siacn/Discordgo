@@ -210,6 +210,11 @@ func (v *VoiceConnection) Close() {
 
 		v.wsConn = nil
 	}
+
+	// Nil the send/receive channels in case the VoiceChannel gets reused,
+	// otherwise the nil check in onEvent means we attempt to send to a closed channel.
+	v.OpusSend = nil
+	v.OpusRecv = nil
 }
 
 // AddHandler adds a Handler for VoiceSpeakingUpdate events.
