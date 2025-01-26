@@ -90,6 +90,9 @@ type Session struct {
 	// Stores a mapping of guild id's to VoiceConnections
 	VoiceConnections map[string]*VoiceConnection
 
+	// Switch to enable processing of voice related messages
+	DisableVoiceHandlers bool
+
 	// Managed state object, updated internally with events when
 	// StateEnabled is true.
 	State *State
