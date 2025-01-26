@@ -730,11 +730,18 @@ func (v *VoiceConnection) opusSender(udpConn *net.UDPConn, close <-chan struct{}
 	binary.BigEndian.PutUint32(udpHeader[8:], v.op2.SSRC)
 
 	// start a send loop that loops until buf chan is closed
-	ticker := time.NewTicker(time.Millisecond * time.Duration(size/(rate/1000)))
-	defer ticker.Stop()
+	sleeper := newSleepCT(time.Millisecond * time.Duration(size/(rate/1000)))
+
 	for {
 
+		// Fixed timing interval
+		// This implementation is more consistent than a standard ticker
+		// The trade off additional idle cpu load
+		// Sleep to next send interval
+		sleeper.sleepNext()
+
 		// Get data from chan.  If chan is closed, return.
+		// Default do nothing if opus buffer empty
 		select {
 		case <-close:
 			return
@@ -742,55 +749,47 @@ func (v *VoiceConnection) opusSender(udpConn *net.UDPConn, close <-chan struct{}
 			if !ok {
 				return
 			}
-			// else, continue loop
-		}
-
-		v.RLock()
-		speaking := v.speaking
-		v.RUnlock()
-		if !speaking {
-			err := v.Speaking(true)
-			if err != nil {
-				v.log(LogError, "error sending speaking packet, %s", err)
+			v.RLock()
+			speaking := v.speaking
+			v.RUnlock()
+			if !speaking {
+				err := v.Speaking(true)
+				if err != nil {
+					v.log(LogError, "error sending speaking packet, %s", err)
+				}
 			}
-		}
 
-		// Add sequence and timestamp to udpPacket
-		binary.BigEndian.PutUint16(udpHeader[2:], sequence)
-		binary.BigEndian.PutUint32(udpHeader[4:], timestamp)
+			// Add sequence and timestamp to udpPacket
+			binary.BigEndian.PutUint16(udpHeader[2:], sequence)
+			binary.BigEndian.PutUint32(udpHeader[4:], timestamp)
 
-		// encrypt the opus data
-		copy(nonce[:], udpHeader)
-		v.RLock()
-		sendbuf := secretbox.Seal(udpHeader, recvbuf, &nonce, &v.op4.SecretKey)
-		v.RUnlock()
+			// encrypt the opus data
+			copy(nonce[:], udpHeader)
+			v.RLock()
+			sendbuf := secretbox.Seal(udpHeader, recvbuf, &nonce, &v.op4.SecretKey)
+			v.RUnlock()
 
-		// block here until we're exactly at the right time :)
-		// Then send rtp audio packet to Discord over UDP
-		select {
-		case <-close:
-			return
-		case <-ticker.C:
-			// continue
-		}
-		_, err := udpConn.Write(sendbuf)
+			_, err := udpConn.Write(sendbuf)
 
-		if err != nil {
-			v.log(LogError, "udp write error, %s", err)
-			v.log(LogDebug, "voice struct: %#v\n", v)
-			return
-		}
+			if err != nil {
+				v.log(LogError, "udp write error, %s", err)
+				v.log(LogDebug, "voice struct: %#v\n", v)
+				return
+			}
 
-		if (sequence) == 0xFFFF {
-			sequence = 0
-		} else {
-			sequence++
-		}
+			if (sequence) == 0xFFFF {
+				sequence = 0
+			} else {
+				sequence++
+			}
 
-		if (timestamp + uint32(size)) >= 0xFFFFFFFF {
-			timestamp = 0
-		} else {
-			timestamp += uint32(size)
+			if (timestamp + uint32(size)) >= 0xFFFFFFFF {
+				timestamp = 0
+			} else {
+				timestamp += uint32(size)
+			}
+		default:
+			// do noting on this tick.
 		}
 	}
 }
