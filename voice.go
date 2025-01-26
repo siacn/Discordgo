@@ -275,7 +275,7 @@ func (v *VoiceConnection) waitUntilConnected() error {
 // Open opens a voice connection.  This should be called
 // after VoiceChannelJoin is used and the data VOICE websocket events
 // are captured.
-func (v *VoiceConnection) open() (err error) {
+func (v *VoiceConnection) Open() (err error) {
 
 	v.log(LogInformational, "called")
 

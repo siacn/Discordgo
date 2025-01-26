@@ -826,7 +826,7 @@ func (s *Session) onVoiceServerUpdate(st *VoiceServerUpdate) {
 	voice.Unlock()
 
 	// Open a connection to the voice server
-	err := voice.open()
+	err := voice.Open()
 	if err != nil {
 		s.log(LogError, "onVoiceServerUpdate voice.open, %s", err)
 	}
