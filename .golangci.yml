@@ -4,6 +4,7 @@ linters:
     # - staticcheck
     # - unused
     - golint
+    - musttag
 
 linters-settings:
   staticcheck:
