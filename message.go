@@ -471,16 +471,28 @@ type MessageApplication struct {
 	Name        string `json:"name"`
 }
 
+// MessageReferenceType is a type of MessageReference
+type MessageReferenceType int
+
+// Known valid MessageReferenceType values
+// https://discord.com/developers/docs/resources/message#message-reference-types
+const (
+	MessageReferenceTypeDefault MessageReferenceType = 0
+	MessageReferenceTypeForward MessageReferenceType = 1
+)
+
 // MessageReference contains reference data sent with crossposted messages
 type MessageReference struct {
-	MessageID       string `json:"message_id"`
-	ChannelID       string `json:"channel_id,omitempty"`
-	GuildID         string `json:"guild_id,omitempty"`
-	FailIfNotExists *bool  `json:"fail_if_not_exists,omitempty"`
+	Type            MessageReferenceType `json:"type,omitempty"`
+	MessageID       string               `json:"message_id"`
+	ChannelID       string               `json:"channel_id,omitempty"`
+	GuildID         string               `json:"guild_id,omitempty"`
+	FailIfNotExists *bool                `json:"fail_if_not_exists,omitempty"`
 }
 
-func (m *Message) reference(failIfNotExists bool) *MessageReference {
+func (m *Message) reference(refType MessageReferenceType, failIfNotExists bool) *MessageReference {
 	return &MessageReference{
+		Type:            refType,
 		GuildID:         m.GuildID,
 		ChannelID:       m.ChannelID,
 		MessageID:       m.ID,
@@ -490,13 +502,18 @@ func (m *Message) reference(failIfNotExists bool) *MessageReference {
 
 // Reference returns a MessageReference of the given message.
 func (m *Message) Reference() *MessageReference {
-	return m.reference(true)
+	return m.reference(MessageReferenceTypeDefault, true)
 }
 
 // SoftReference returns a MessageReference of the given message.
 // If the message doesn't exist it will instead be sent as a non-reply message.
 func (m *Message) SoftReference() *MessageReference {
-	return m.reference(false)
+	return m.reference(MessageReferenceTypeDefault, false)
+}
+
+// Forward returns a MessageReference for a forwarded message.
+func (m *Message) Forward() *MessageReference {
+	return m.reference(MessageReferenceTypeForward, true)
 }
 
 // ContentWithMentionsReplaced will replace all @<id> mentions with the
