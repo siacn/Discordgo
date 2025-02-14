@@ -102,6 +102,15 @@ type User struct {
 	Flags int `json:"flags"`
 }
 
+// Parses the `ID` field to a uint64 and returns it.
+// This function is not cached
+func (u *User) IdLong() uint64 {
+	// We can ignore the error because discord
+	// identifiers are always valid as uint64
+	res, _ := strconv.ParseUint(u.ID, 10, 64)
+	return res
+}
+
 // String returns a unique identifier of the form username#discriminator
 // or just username, if the discriminator is set to "0".
 func (u *User) String() string {
